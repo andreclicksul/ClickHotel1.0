@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model tb_users {
+  id             String   @id @default(uuid())
+  user           String   @unique
+  name           String
+  email          String   @unique
+  phone          String?
+  password       String
+  startTime      DateTime
+  finishTime     DateTime
+  sunday         Boolean  @default(false)
+  monday         Boolean  @default(false)
+  tuesday        Boolean  @default(false)
+  wednesday      Boolean  @default(false)
+  thursday       Boolean  @default(false)
+  friday         Boolean  @default(false)
+  saturday       Boolean  @default(false)
+  client         Int
+  caduser        Int
+  checklist      Int
+  provider       Int
+  audit          Int
+  accountpay     Int
+  accountreceive Int
+  financial      Int
+  product        Int
+  occupationmap  Int
+  inactive       Boolean  @default(false)
+  dtregister     DateTime @default(now())
+  lastchange     String
+  color          String
+  avatar         Int
+  deleted        Int
+}

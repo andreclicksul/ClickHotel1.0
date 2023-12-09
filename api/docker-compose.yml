@@ -1,0 +1,34 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:latest
+    restart: always
+    environment:
+      - POSTGRES_USER=clickhotel
+      - POSTGRES_PASSWORD=jRQnOdqmKNhlrzoL
+    ports:
+      - '15432:5432'
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    networks:
+      - postgres-clickhotel
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "andre@clicksul.com.br"
+      PGADMIN_DEFAULT_PASSWORD: "PgAdmin2023!"
+    ports:
+      - "16542:80"
+    depends_on:
+      - postgres
+    networks:
+      - postgres-clickhotel
+
+networks:
+  postgres-clickhotel:
+    driver: bridge
+
+volumes:
+  postgres:
+  
