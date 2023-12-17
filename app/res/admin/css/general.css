@@ -1,0 +1,99 @@
+.box.box-purple {
+  border-top-color: #605ca8;
+}
+
+.td-verticalcenter {
+  vertical-align: middle !important;
+}
+
+.ls-display-none {
+  display: none !important;
+}
+
+.font12 {
+  font-size: 12px;
+}
+
+.font14 {
+  font-size: 14px;
+}
+
+.font16 {
+  font-size: 16px;
+}
+
+.fontW{
+  font-weight: 500;
+}
+
+.font700 {
+  font-weight: 700;
+}
+
+.padB30 {
+  padding-bottom: 30px;
+}
+
+.padT20 {
+  padding-top: 20px;
+}
+
+.padL6 {
+  padding-left: 6px;
+}
+
+.padR18 {
+  padding-right: 18px;
+}
+
+.fontTitle {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.ls-label {
+  display: block;
+  margin-bottom: 15px;
+  float: left !important;
+}
+
+.ls-tabs-btn .ls-tabs-btn-nav {
+  list-style: none;
+  margin-right: 0;
+  margin-left: -5px;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.ls-tabs-btn .ls-tabs-btn-nav [class*="col-"] {
+  padding: 0 5px;
+  overflow: hidden;
+}
+
+.ls-btn {
+  color: #555555;
+  display: inline-block;
+  font-size: 16px;
+  font-weight: 300;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  position: relative;
+  width: 100%;
+  vertical-align: top;
+  margin-top: 0;
+  line-height: 19.8px;
+  margin-right: 5px;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: 1px solid #b2b2b2;  
+  border-radius: 4px;
+  background-color: white;
+  text-decoration: none;
+  text-align: center;
+  white-space: normal;
+  appearance: none;  
+}
+
+.width10px {
+  width: 10px;
+}

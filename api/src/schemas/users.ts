@@ -37,6 +37,6 @@ export const readUniqueSchema = z.object({
 })
 
 export const authenticateSchema = z.object({
-  login: z.string(),
+  email: z.string(),
   password: z.string(),
 })

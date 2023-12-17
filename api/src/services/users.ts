@@ -16,7 +16,7 @@ export const loginRouterHandler = async (
   reply: FastifyReply,
 ) => {
   try {
-    const { login, password } = authenticateSchema.parse(request.body)
+    const { email, password } = authenticateSchema.parse(request.body)
 
     const user = await prisma.tb_users.findUniqueOrThrow({
       select: {
@@ -32,9 +32,11 @@ export const loginRouterHandler = async (
         thursday: true,
         friday: true,
         saturday: true,
+        color: true,
       },
       where: {
-        email: login,
+        email,
+        deleted: 0,
       },
     })
 
@@ -46,7 +48,9 @@ export const loginRouterHandler = async (
     // Entrar com as verificações de horário e dias da semana
     const token = app.jwt.sign({ id: user.id })
 
-    reply.code(200).send({ msg: 'OK', token })
+    reply
+      .code(200)
+      .send({ msg: 'OK', token, name: user.name, descor: user.color })
   } catch (error) {
     reply.code(401).send({ msg: 'Falha no Login', error })
   }

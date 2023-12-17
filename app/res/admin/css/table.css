@@ -1,0 +1,22 @@
+.rdt_Table {
+  width: 100%;
+  background-color: transparent;
+  border-spacing: 0;
+  border-collapse: separate;
+  clear: both;
+  margin-top: 6px !important;
+  margin-bottom: 6px !important;
+  max-width: none !important;
+  border: 1px solid #f4f4f4;
+}
+
+.rdt_TableCol {
+  cursor: pointer;
+  position: relative;
+  border-bottom-width: 2px;
+  line-height: 1.42857143;
+  font-family: 'Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif;
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
