@@ -13,8 +13,14 @@ const authUrl: object = {
   '/createuser': true,
   '/readusers': true,
   '/readuser/:id': true,
+  '/readpermissionuser/:id': true,
 }
 
+/*
+app.register(cors, {
+  origin: [`${url}`,], // ambiente de teste e de produção
+})
+*/
 app.register(cors, {
   origin: [`${url}`], // ambiente de teste e de produção
 })
@@ -33,6 +39,7 @@ app.addHook('onRequest', async (req, reply) => {
     // @ts-ignore
     if (authUrl[path]) {
       await req.jwtVerify()
+      // verificar as condições de dia da semana e horário para o token enviado
     }
   } catch (error) {
     reply.code(401).send({ msg: 'Sessão encerrada' })

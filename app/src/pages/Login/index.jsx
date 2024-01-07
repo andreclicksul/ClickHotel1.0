@@ -67,6 +67,7 @@ const Login = () => {
         setTimeout( () => setInvalidaccess(''), 4000)      
       }
     } catch (e) {
+      console.log(e)
       setInvalidaccess('Falha na comunicação, tente mais tarde')
       setTimeout( () => setInvalidaccess(''), 4000)      
     }

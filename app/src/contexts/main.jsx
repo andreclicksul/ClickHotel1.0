@@ -44,12 +44,8 @@ export const MainProvider = ({ children }) => {
 
   const readPermissionUser = async () => {
 
-    const userData = {
-      email: user.email
-    }      
-
     try {
-      const response = await post('/readpermissionuser', userData)
+      const response = await get(`/readpermissionuser${user.iduser}`)
 
       if (response.status != 200) {
         logout()
@@ -60,7 +56,7 @@ export const MainProvider = ({ children }) => {
       setData({
         desip: response.desip,
         descor: response.descor,
-        iduser: response.iduser,
+        iduser: user.iduser,
         desuser: response.desuser,
         avatar: response.avatar,
         desname: response.desname,
@@ -70,6 +66,8 @@ export const MainProvider = ({ children }) => {
         msgfooter: response.msgFooter,
         countavatar: response.countAvatar,
         timenow: response.timenow,
+        startTime: response.startTime,
+        finishTime: response.finishTime,
         srcAvatar: `/res/admin/avatar/avatar${response.avatar}.png`
       })
 

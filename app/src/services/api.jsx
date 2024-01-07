@@ -4,7 +4,7 @@ import { AuthContext } from '../contexts/context'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+  headers: { 'Content-Type': 'application/json; charset=utf-8' }
 })
 
 const apiCep = axios.create({
@@ -12,7 +12,7 @@ const apiCep = axios.create({
 })
 
 api.interceptors.request.use(async config => {
-    const { user } = useContext(AuthContext)
+    const user = getUserLocalStorage('u')
     if (user) {
       const token = `Bearer ${user.token}`
       config.headers.Authorization = token

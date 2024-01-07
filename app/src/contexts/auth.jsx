@@ -5,33 +5,33 @@ import { post } from "../services/api"
 
 export const AuthProvider = ({ children }) => {
 
-  const [user, setUser] = useState(null)
+  const [ user, setUser ] = useState(null)
 
-  const [loading, setLoading] = useState(true)  
+  const [ loading, setLoading ] = useState(true)  
 
-  const [forgotsend, setForgotsend] = useState(false)
+  const [ forgotsend, setForgotsend ] = useState(false)
 
   useEffect(() => {
     const user = getUserLocalStorage("u")
-
     if (user) {
       setUser(user)
     }
-    
     setLoading(false)
   }, [])
 
   const authenticate = async (email, Data) => {
-    
+
     const response = await post('/authenticate', Data)
     //const response = await post('login.php', Data)
-    console.log(response)
 
     if (response.status == 200) {
-      const payload = { token: response.token, descor: response.descor, desuser: response.name, email}
+      const payload = { 
+        token: response.token, 
+        iduser: response.iduser,
+        email
+      }
       setUser(payload)
       setUserLocalStorage("u", payload)
-      //apiBearer(response.token) 
       return true
     } else {
       logout()

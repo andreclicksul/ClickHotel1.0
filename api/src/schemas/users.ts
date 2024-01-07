@@ -6,8 +6,8 @@ export const createSchema = z.object({
   email: z.string(),
   phone: z.string(),
   password: z.string(),
-  startTime: z.string().datetime(),
-  finishTime: z.string().datetime(),
+  starttime: z.string().datetime(),
+  finishtime: z.string().datetime(),
   sunday: z.boolean(),
   monday: z.boolean(),
   tuesday: z.boolean(),
@@ -25,11 +25,9 @@ export const createSchema = z.object({
   financial: z.number().int(),
   product: z.number().int(),
   occupationmap: z.number().int(),
-  inactive: z.boolean(),
   lastchange: z.string(),
   color: z.string(),
   avatar: z.number().int(),
-  deleted: z.number().int(),
 })
 
 export const readUniqueSchema = z.object({

@@ -9,6 +9,7 @@ import {
   authenticateSchema,
   readUniqueSchema,
 } from '../schemas/users'
+import { findUserAuthentication } from '../middlewares/user.services'
 
 // user authenticate
 export const loginRouterHandler = async (
@@ -18,47 +19,91 @@ export const loginRouterHandler = async (
   try {
     const { email, password } = authenticateSchema.parse(request.body)
 
-    const user = await prisma.tb_users.findUniqueOrThrow({
-      select: {
-        id: true,
-        password: true,
-        name: true,
-        startTime: true,
-        finishTime: true,
-        sunday: true,
-        monday: true,
-        tuesday: true,
-        wednesday: true,
-        thursday: true,
-        friday: true,
-        saturday: true,
-        color: true,
-      },
+    const registerUser = await prisma.tb_users.findMany({
       where: {
         email,
-        deleted: 0,
+        deleted: false,
+        inactive: false,
+      },
+      include: {
+        tb_audits: {
+          take: 2,
+          orderBy: {
+            id: 'desc',
+          },
+          select: {
+            ipaccess: true,
+            dtregister: true,
+          },
+        },
       },
     })
 
-    const checkPassword = await bcrypt.compare(password, user.password)
+    if (registerUser.length === 0) throw new Error()
 
-    if (!checkPassword || difTime(user.startTime, user.finishTime))
+    const objectUser = registerUser[0]
+
+    const { user, permissionDay, passwordHash } =
+      await findUserAuthentication(objectUser)
+
+    const checkPassword = await bcrypt.compare(password, passwordHash)
+
+    if (
+      !checkPassword ||
+      !permissionDay ||
+      difTime(user.starttime, user.finishtime)
+    )
       throw new Error()
 
-    // Entrar com as verificações de horário e dias da semana
-    const token = app.jwt.sign({ id: user.id })
+    const token = app.jwt.sign(user)
 
-    reply
-      .code(200)
-      .send({ msg: 'OK', token, name: user.name, descor: user.color })
+    reply.code(200).send({
+      token,
+      iduser: user.id,
+      status: 200,
+    })
   } catch (error) {
-    reply.code(401).send({ msg: 'Falha no Login', error })
+    reply.code(401).send({ status: 401, error })
+  }
+}
+
+// read permissions user
+export const readPermissionUserIdHandler = async (
+  request: FastifyRequest,
+  reply: FastifyReply,
+) => {
+  try {
+    const { id } = readUniqueSchema.parse(request.params)
+    const user = await prisma.tb_users.findMany({
+      where: {
+        id,
+      },
+      include: {
+        tb_audits: {
+          take: 2,
+          orderBy: {
+            id: 'desc',
+          },
+          select: {
+            ipaccess: true,
+            dtregister: true,
+          },
+        },
+      },
+    })
+    reply.code(200).send({ data: user })
+  } catch (error) {
+    reply.code(401).send({ status: 401, error })
   }
 }
 
 // read users
-export const readUsersHandler = async (reply: FastifyReply) => {
+export const readUsersHandler = async (
+  request: FastifyRequest,
+  reply: FastifyReply,
+) => {
   try {
+    console.log(request.user)
     const users = await prisma.tb_users.findMany()
     reply.code(200).send({ msg: 'Usuário OK', data: users })
   } catch (error) {
@@ -104,8 +149,8 @@ export const createUserHandler = async (
       email,
       phone,
       password,
-      startTime,
-      finishTime,
+      starttime,
+      finishtime,
       sunday,
       monday,
       tuesday,
@@ -123,11 +168,9 @@ export const createUserHandler = async (
       financial,
       product,
       occupationmap,
-      inactive,
       lastchange,
       color,
       avatar,
-      deleted,
     } = createSchema.parse(request.body)
 
     const salt = await bcrypt.genSalt(12)
@@ -140,8 +183,8 @@ export const createUserHandler = async (
         email,
         phone,
         password: passwordHash,
-        startTime,
-        finishTime,
+        starttime,
+        finishtime,
         sunday,
         monday,
         tuesday,
@@ -159,11 +202,9 @@ export const createUserHandler = async (
         financial,
         product,
         occupationmap,
-        inactive,
         lastchange,
         color,
         avatar,
-        deleted,
       },
     })
     reply.code(200).send({ msg: 'Usuário OK', data: createuser })

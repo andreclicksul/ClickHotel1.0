@@ -1,11 +1,21 @@
 /* eslint-disable prettier/prettier */
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
-import { loginRouterHandler, readUsersHandler,  readUserIdHandler, createUserHandler } from '../services/users'
+import { 
+  loginRouterHandler, 
+  readUsersHandler,  
+  readUserIdHandler, 
+  createUserHandler,
+  readPermissionUserIdHandler
+} from '../services/users'
 
 export async function userRoutes(app: FastifyInstance) {
   // read users
   app.get('/readusers', async (request: FastifyRequest, reply: FastifyReply) => 
-    await readUsersHandler(reply))
+    await readUsersHandler(request, reply))
+
+  // read permissions user
+  app.get('/readpermissionuser/:id', async (request: FastifyRequest, reply: FastifyReply) => 
+    await readPermissionUserIdHandler(request, reply))
 
   // read a user
   app.get('/readuser/:id', async (request: FastifyRequest, reply: FastifyReply) => 
