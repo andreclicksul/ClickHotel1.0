@@ -13,6 +13,24 @@ services:
     networks:
       - postgres-clickhotel
 
+  api:
+    depends_on:
+      - postgres
+    build: ./api
+    restart: unless-stopped
+    ports:
+      - 3001:3000
+    environment:
+      - DB_HOST=postgres
+      - DB_USER=clickhotel
+      - DB_PASSWORD=jRQnOdqmKNhlrzoL
+      - DB_NAME=clickhotel
+      - DB_PORT=15432
+    stdin_open: true
+    tty: true
+    networks:
+      - postgres-clickhotel      
+
   pgadmin:
     image: dpage/pgadmin4
     environment:

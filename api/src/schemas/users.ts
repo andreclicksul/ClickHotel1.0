@@ -1,13 +1,20 @@
 import { z } from 'zod'
 
+export const readPermissionSchema = z.object({
+  id: z.string(),
+  user: z.string(),
+  starthour: z.string(),
+  startminute: z.string(),
+  finishhour: z.string(),
+  finishminute: z.string(),
+})
+
 export const createSchema = z.object({
   user: z.string(),
   name: z.string(),
   email: z.string(),
   phone: z.string(),
   password: z.string(),
-  starttime: z.string().datetime(),
-  finishtime: z.string().datetime(),
   sunday: z.boolean(),
   monday: z.boolean(),
   tuesday: z.boolean(),
@@ -28,6 +35,10 @@ export const createSchema = z.object({
   lastchange: z.string(),
   color: z.string(),
   avatar: z.number().int(),
+  starthour: z.string(),
+  startminute: z.string(),
+  finishhour: z.string(),
+  finishminute: z.string(),
 })
 
 export const readUniqueSchema = z.object({

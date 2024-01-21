@@ -1,24 +1,6 @@
-export const difTime = (date1: string, date2: string) => {
-  const datetemp1 = date1.substring(11, 2)
-
-  console.log(datetemp1)
-
-  /*
-  const [HH1, mm1] = timetemp1.split(':')
-
-  console.log(HH1, mm1)
-  return false
-
-  const HH1: number = parseInt(date1.substr(11, 2))
-  const mm1: number = parseInt(date1.substr(14, 2))
-
-  const HH2: number = parseInt(date2.substr(11, 2))
-  const mm2: number = parseInt(date2.substr(14, 2))
-
-
-
-  const dateStart = new Date(2023, 1, 1, HH1, mm1)
-  const dateFinish = new Date(2023, 1, 1, HH2, mm2)
+export const difTime = (HH1: string, mm1: string, HH2: string, mm2: string) => {
+  const dateStart = new Date(2023, 1, 1, parseInt(HH1) - 3, parseInt(mm1))
+  const dateFinish = new Date(2023, 1, 1, parseInt(HH2) - 3, parseInt(mm2))
 
   const toDay = new Date()
   const HH3: number = toDay.getHours() - 3
@@ -35,5 +17,4 @@ export const difTime = (date1: string, date2: string) => {
     res = true
 
   return res
-  */
 }

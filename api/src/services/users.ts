@@ -8,6 +8,7 @@ import {
   createSchema,
   authenticateSchema,
   readUniqueSchema,
+  readPermissionSchema,
 } from '../schemas/users'
 import { findUserAuthentication } from '../middlewares/user.services'
 
@@ -43,19 +44,21 @@ export const loginRouterHandler = async (
 
     const objectUser = registerUser[0]
 
-    const { user, permissionDay, passwordHash } =
+    const { user, isPermission, passwordHash } =
       await findUserAuthentication(objectUser)
 
     const checkPassword = await bcrypt.compare(password, passwordHash)
 
-    if (
-      !checkPassword ||
-      !permissionDay ||
-      difTime(user.starttime, user.finishtime)
+    const diftime = difTime(
+      user.starthour,
+      user.startminute,
+      user.finishhour,
+      user.finishminute,
     )
-      throw new Error()
 
-    const token = app.jwt.sign(user)
+    if (!checkPassword || !isPermission || diftime) throw new Error()
+
+    const token = app.jwt.sign(user, { expiresIn: '8h' })
 
     reply.code(200).send({
       token,
@@ -73,27 +76,27 @@ export const readPermissionUserIdHandler = async (
   reply: FastifyReply,
 ) => {
   try {
-    const { id } = readUniqueSchema.parse(request.params)
-    const user = await prisma.tb_users.findMany({
-      where: {
-        id,
-      },
-      include: {
-        tb_audits: {
-          take: 2,
-          orderBy: {
-            id: 'desc',
-          },
-          select: {
-            ipaccess: true,
-            dtregister: true,
-          },
-        },
-      },
-    })
-    reply.code(200).send({ data: user })
+    const authorization = request.raw.headers.authorization
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const token: string = authorization.split(' ')[1]
+
+    const { starthour, startminute, finishhour, finishminute } =
+      readPermissionSchema.parse(app.jwt.decode(token))
+
+    const diftime: boolean = difTime(
+      starthour,
+      startminute,
+      finishhour,
+      finishminute,
+    )
+
+    if (diftime) throw new Error()
+
+    // reply.code(200).send({ status: 200, iduser: id, user })
   } catch (error) {
-    reply.code(401).send({ status: 401, error })
+    reply.code(401).send({ msg: 'Sessão encerrada' })
   }
 }
 
@@ -103,7 +106,6 @@ export const readUsersHandler = async (
   reply: FastifyReply,
 ) => {
   try {
-    console.log(request.user)
     const users = await prisma.tb_users.findMany()
     reply.code(200).send({ msg: 'Usuário OK', data: users })
   } catch (error) {
@@ -149,8 +151,6 @@ export const createUserHandler = async (
       email,
       phone,
       password,
-      starttime,
-      finishtime,
       sunday,
       monday,
       tuesday,
@@ -171,6 +171,10 @@ export const createUserHandler = async (
       lastchange,
       color,
       avatar,
+      starthour,
+      startminute,
+      finishhour,
+      finishminute,
     } = createSchema.parse(request.body)
 
     const salt = await bcrypt.genSalt(12)
@@ -183,8 +187,6 @@ export const createUserHandler = async (
         email,
         phone,
         password: passwordHash,
-        starttime,
-        finishtime,
         sunday,
         monday,
         tuesday,
@@ -205,6 +207,10 @@ export const createUserHandler = async (
         lastchange,
         color,
         avatar,
+        starthour,
+        startminute,
+        finishhour,
+        finishminute,
       },
     })
     reply.code(200).send({ msg: 'Usuário OK', data: createuser })

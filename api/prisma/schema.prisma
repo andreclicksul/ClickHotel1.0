@@ -15,8 +15,6 @@ model tb_users {
   email          String     @unique
   phone          String?
   password       String
-  starttime      DateTime
-  finishtime     DateTime
   sunday         Boolean    @default(false)
   monday         Boolean    @default(false)
   tuesday        Boolean    @default(false)
@@ -39,6 +37,10 @@ model tb_users {
   lastchange     String
   color          String
   avatar         Int
+  starthour      String
+  startminute    String
+  finishhour     String
+  finishminute   String
   deleted        Boolean    @default(false)
   tb_audits      tb_audit[]
 }

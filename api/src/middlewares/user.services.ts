@@ -7,8 +7,6 @@ export async function findUserAuthentication(objectUser: any) {
     name: objectUser.name,
     email: objectUser.email,
     phone: objectUser.phone,
-    starttime: objectUser.starttime,
-    finishtime: objectUser.finishtime,
     client: objectUser.client,
     caduser: objectUser.caduser,
     checklist: objectUser.checklist,
@@ -21,9 +19,13 @@ export async function findUserAuthentication(objectUser: any) {
     occupationmap: objectUser.occupationmap,
     color: objectUser.color,
     avatar: objectUser.avatar,
-    expiresIn: '8h',
+    starthour: objectUser.starthour,
+    startminute: objectUser.startminute,
+    finishhour: objectUser.finishhour,
+    finishminute: objectUser.finishminute,
   }
 
+  /*
   const weekDay: number = new Date().getDay()
 
   const dayUser = [
@@ -37,10 +39,47 @@ export async function findUserAuthentication(objectUser: any) {
   ]
 
   const permissionDay: boolean = dayUser[weekDay]
+    */
+
+  const isPermission = permissionDay(
+    objectUser.sunday,
+    objectUser.monday,
+    objectUser.tuesday,
+    objectUser.wednesday,
+    objectUser.thursday,
+    objectUser.friday,
+    objectUser.saturday,
+  )
 
   return {
     user,
-    permissionDay,
+    isPermission,
     passwordHash,
   }
+}
+
+export const permissionDay = (
+  sunday: boolean,
+  monday: boolean,
+  tuesday: boolean,
+  wednesday: boolean,
+  thursday: boolean,
+  friday: boolean,
+  saturday: boolean,
+): boolean => {
+  const weekDay: number = new Date().getDay()
+
+  const dayUser = [
+    sunday,
+    monday,
+    tuesday,
+    wednesday,
+    thursday,
+    friday,
+    saturday,
+  ]
+
+  const isPermission: boolean = dayUser[weekDay]
+
+  return isPermission
 }
