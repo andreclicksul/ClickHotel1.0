@@ -1,16 +1,17 @@
 import axios from 'axios'
-import { useContext } from "react"
-import { AuthContext } from '../contexts/context'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  headers: { 'Content-Type': 'application/json; charset=utf-8' }
+  headers: { 
+    'Content-Type': 'application/json; charset=utf-8',
+  }
 })
 
 const apiCep = axios.create({
   baseURL: 'https://viacep.com.br/ws/'
 })
 
+/*
 api.interceptors.request.use(async config => {
     const user = getUserLocalStorage('u')
     if (user) {
@@ -20,6 +21,7 @@ api.interceptors.request.use(async config => {
     return config
   }
 )
+*/
 
 export const post = async (url, Data) => {
   const request = await api.post(url, Data)

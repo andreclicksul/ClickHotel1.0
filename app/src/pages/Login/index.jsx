@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { AuthContext } from "../../contexts/context"
+import { getUserLocalStorage } from "../../services/api"
 
 const Login = () => {
 
@@ -61,6 +62,8 @@ const Login = () => {
     try {
       const response = await authenticate(data.email, userData)
       if (response) {
+        console.log(getUserLocalStorage('u'))
+        return false
         navigate('/home')
       } else {
         setInvalidaccess('Você não tem permissão de acesso')

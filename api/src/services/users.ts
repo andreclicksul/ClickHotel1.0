@@ -66,7 +66,7 @@ export const loginRouterHandler = async (
       status: 200,
     })
   } catch (error) {
-    reply.code(401).send({ status: 401, error })
+    reply.code(401).send({ status: 401, msg: 'erro de autenticação', error })
   }
 }
 

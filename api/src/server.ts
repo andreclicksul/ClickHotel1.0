@@ -19,6 +19,7 @@ const authUrl: object = {
 
 app.register(cors, {
   origin: [`${url}`], // ambiente de teste e de produção
+  allowedHeaders: ['Content-Type', 'Authorization'],
 })
 
 app.register(userRoutes)
