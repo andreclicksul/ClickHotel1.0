@@ -11,7 +11,6 @@ const url = process.env.URL_TEST
 const jwtsecret = process.env.JWT_SECRET
 
 const authUrl: object = {
-  '/createuser': true,
   '/readusers': true,
   '/readuser/:id': true,
   '/readpermissionuser/:id': true,
@@ -38,7 +37,7 @@ app.addHook('onRequest', async (req, reply) => {
       await req.jwtVerify()
     }
   } catch (error) {
-    reply.code(401).send({ msg: 'Sessão encerrada' })
+    reply.code(401).send({ msg: 'Sessão encerrada', error })
   }
 })
 

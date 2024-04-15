@@ -1,13 +1,22 @@
-FROM node:latest
+FROM node:alpine3.18
 
-WORKDIR /tmp/react
+RUN addgroup app && adduser -S -G app app
 
-COPY . .
+USER app
+
+WORKDIR /app
+
+COPY --chown=app:node . .
+
+#COPY . .
 
 RUN rm -rf node_modules
-RUN npn install
+
+RUN npm i --force
 
 RUN npm run build
+
+USER root
 
 RUN mkdir -p /var/www/html
 
@@ -17,4 +26,4 @@ VOLUME /var/www/html
 
 WORKDIR /
 
-RUN rm -rf /tmp/react
+RUN rm -rf /app
