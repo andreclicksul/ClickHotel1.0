@@ -5,13 +5,14 @@ services:
     image: postgres:latest
     restart: always
     environment:
-      - POSTGRES_USER=clickhotel
-      - POSTGRES_PASSWORD=jRQnOdqmKNhlrzoL
-      - POSTGRES_DB=clickhotel_api
+      POSTGRES_USER: clickhotel
+      POSTGRES_PASSWORD: jRQnOdqmKNhlrzoL
+      POSTGRES_DB: clickhotel_api
+      PGDATA: /var/lib/postgresql/data
     ports:
-      - '15432:5432'
+      - 15432:5432
     volumes:
-      - postgres:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - postgres-clickhotel
 
@@ -19,31 +20,24 @@ services:
     container_name: api-clickhotel
     depends_on:
       - postgres
-    build: ./api
+    build: ./
     env_file:
       - ./.env
     restart: always
     ports:
       - 3001:3000
-    environment:
-      - DB_HOST=postgres
-      - DB_USER=clickhotel
-      - DB_PASSWORD=jRQnOdqmKNhlrzoL
-      - DB_NAME=clickhotel
-      - DB_PORT=15432
-    stdin_open: true
-    tty: true
     networks:
       - postgres-clickhotel      
 
   pgadmin:
     container_name: pgadmin-clickhotel
     image: dpage/pgadmin4
+    restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: "andre@clicksul.com.br"
       PGADMIN_DEFAULT_PASSWORD: "PgAdmin2023!"
     ports:
-      - "16542:80"
+      - 16542:80
     depends_on:
       - postgres
     networks:
@@ -54,5 +48,6 @@ networks:
     driver: bridge
 
 volumes:
-  postgres:
+  postgres-data:
+
   

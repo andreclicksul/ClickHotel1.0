@@ -1,3 +1,14 @@
 3 - criar o docker para o nodejs - olhar o que já tenho pronto para adaptar
 ou
 4 - react conectando com o node na autenticação, perfeitamente
+
+após criar ou alterar tabelas
+npx prisma migrate  //--name init(verificar se presica)
+
+enviar alterações para o postgres
+npx prisma generate
+
+Para interligar o pgadmin
+docker ps
+dps docker inspect e o id do container para saber o ip do pgadmin no container
+i ip para colocar no host do phadmin é o "gatway"

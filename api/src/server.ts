@@ -14,6 +14,7 @@ const authUrl: object = {
   '/readusers': true,
   '/readuser/:id': true,
   '/readpermissionuser/:id': true,
+  '/createuser': true,
 }
 
 app.register(cors, {

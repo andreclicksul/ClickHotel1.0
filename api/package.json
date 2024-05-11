@@ -19,6 +19,7 @@
   "devDependencies": {
     "@rocketseat/eslint-config": "^2.1.0",
     "@types/node": "^20.10.4",
+    "@types/pg": "^8.11.6",
     "docker-compose": "^0.24.3",
     "eslint": "^8.55.0",
     "prisma": "^5.7.1",

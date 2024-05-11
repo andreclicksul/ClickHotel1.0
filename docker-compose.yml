@@ -1,61 +1,74 @@
-version: '3.8'
+version: "3"
 services:
   postgres:
     container_name: postgres-clickhotel
     image: postgres:latest
     restart: always
     environment:
-      - POSTGRES_USER=clickhotel
-      - POSTGRES_PASSWORD=jRQnOdqmKNhlrzoL
-      - POSTGRES_DB=clickhotel_api
+      POSTGRES_USER: clickhotel
+      POSTGRES_PASSWORD: jRQnOdqmKNhlrzoL
+      POSTGRES_DB: clickhotel_api
+      PGDATA: /var/lib/postgresql/data
     ports:
-      - '15432:5432'
+      - 15432:5432
     volumes:
-      - postgres-clickhotel-volume:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - postgres-clickhotel
+
+  nginx:
+    depends_on:
+      - api
+      - client
+    restart: always
+    build:
+      dockerfile: Dockerfile
+      context: ./nginx
+    ports:
+      - "3050:80"
+    networks:
+      - postgres-clickhotel      
 
   api:
     container_name: api-clickhotel
     depends_on:
       - postgres
-    build: ./api
+    build:
+      dockerfile: Dockerfile
+      context: "./api"
     env_file:
       - ./api/.env
     restart: always
     ports:
       - 3001:3000
-
-  app:
-    container_name: app-clickhotel
-    depends_on:
-      - postgres
-    build: ./app
-    env_file:
-      - ./app/.env
     volumes:
-      - app-clickhotel-volume:/var/www/html
+      - /app/node_modules
+      - ./api:/app      
+    networks:
+      - postgres-clickhotel      
 
-  nginx:  
-    container_name: nginx-clickhotel
-    build: ./nginx
-    ports:
-      - 80:80
+  client:
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    build:
+      dockerfile: Dockerfile
+      context: ./app
     volumes:
-      - app-clickhotel-volume:/var/www/html
-    depends_on:
-      - postgres
-      - api
-      - app
+      - /app/node_modules
+      - ./app:/app
+    networks:
+      - postgres-clickhotel       
 
   pgadmin:
     container_name: pgadmin-clickhotel
     image: dpage/pgadmin4
+    restart: always
     environment:
       PGADMIN_DEFAULT_EMAIL: "andre@clicksul.com.br"
       PGADMIN_DEFAULT_PASSWORD: "PgAdmin2023!"
     ports:
-      - "16542:80"
+      - 16542:80
     depends_on:
       - postgres
     networks:
@@ -63,9 +76,4 @@ services:
 
 networks:
   postgres-clickhotel:
-    driver: bridge
-
-volumes:
-  postgres-clickhotel-volume:
-  app-clickhotel-volume:
-  
+    driver: bridge      

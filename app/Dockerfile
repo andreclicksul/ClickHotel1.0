@@ -1,29 +1,23 @@
-FROM node:alpine3.18
-
-RUN addgroup app && adduser -S -G app app
-
-USER app
+FROM node:18-alpine as build
 
 WORKDIR /app
 
-COPY --chown=app:node . .
+ENV PATH /app/node_modules/.bin:$PATH
 
-#COPY . .
+COPY package*.json ./
 
-RUN rm -rf node_modules
+RUN npm ci --silent
 
-RUN npm i --force
-
+COPY . ./
 RUN npm run build
 
-USER root
+# Server
+# FROM nginx:stable-alpine 
+# COPY --from=build /app/dist /usr/share/nginx/html
+# COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN mkdir -p /var/www/html
+#EXPOSE 3050
 
-RUN mv dist/* /var/www/html
+#CMD ["nginx", "-g", "daemon off;"]
 
-VOLUME /var/www/html
-
-WORKDIR /
-
-RUN rm -rf /app
+CMD ["npm", "run", "start"]

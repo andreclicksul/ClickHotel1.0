@@ -1,18 +1,24 @@
-FROM node:alpine3.18
+FROM node:current-alpine as build
+WORKDIR /api
+ENV PATH /api/node_modules/.bin:$PATH
+COPY package*.json ./
+RUN npm ci --silent
+COPY . ./
+RUN npm run build
 
-RUN addgroup api && adduser -S -G api api
-
-USER api
-
+FROM node:current-alpine
 WORKDIR /api
 
-COPY --chown=api:node package*.json ./
-# COPY package*.json .
+COPY --from=build /api/node_modules ./node_modules
+COPY --from=build /api/package*.json ./
+COPY --from=build /api/build ./
+COPY --from=build /api/prisma/schema.prisma ./prisma/
+COPY --from=build /api/prisma/migrations/ ./prisma/
 
-RUN npm i --force
-COPY --chown=api:node . .
-# COPY . .
-EXPOSE 3001
+RUN npm config set update-notifier false
 
 RUN npx prisma generate
-CMD [ "npm", "run", "dev" ]
+
+EXPOSE 3001
+
+CMD ["npm", "run", "dev"]
