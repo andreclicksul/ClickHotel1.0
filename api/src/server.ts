@@ -30,6 +30,8 @@ app.register(fastifyJwt, {
 
 app.addHook('onRequest', async (req, reply) => {
   try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const path: string = req.routeOptions.url
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
@@ -42,7 +44,7 @@ app.addHook('onRequest', async (req, reply) => {
   }
 })
 
-const PORT = process.env.NODE_DOCKER_PORT || 3000
+const PORT = process.env.NODE_DOCKER_PORT || 3001
 
 app
   .listen({

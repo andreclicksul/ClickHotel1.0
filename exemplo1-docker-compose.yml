@@ -1,4 +1,4 @@
-version: '3.8'
+version: "4"
 services:
   postgres:
     container_name: postgres-clickhotel
@@ -20,14 +20,32 @@ services:
     container_name: api-clickhotel
     depends_on:
       - postgres
-    build: ./
+    build:
+      dockerfile: Dockerfile
+      context: ./api
     env_file:
-      - ./.env
+      - ./api/.env
     restart: always
     ports:
       - 3001:3000
+    volumes:
+      - /app/node_modules
+      - ./api:/app      
     networks:
       - postgres-clickhotel      
+
+  client:
+    stdin_open: true
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    build:
+      dockerfile: Dockerfile
+      context: ./app
+    volumes:
+      - /app/node_modules
+      - ./app:/app
+    networks:
+      - postgres-clickhotel       
 
   pgadmin:
     container_name: pgadmin-clickhotel
@@ -45,9 +63,7 @@ services:
 
 networks:
   postgres-clickhotel:
-    driver: bridge
+    driver: bridge      
 
 volumes:
   postgres-data:
-
-  

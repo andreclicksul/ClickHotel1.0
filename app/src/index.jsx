@@ -2,7 +2,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 
 import '/res/admin/bootstrap/css/bootstrap.min.css'
-import '/res/admin/dist/css/font-awesome.min.css'
+import '/res/admin/dist/css/font-awesome.mim.css'
 import '/res/admin/dist/css/ionicons.min.css'
 import '/res/admin/plugins/datatables/dataTables.bootstrap.css'
 //import '/res/admin/plugins/iCheck/all.css'
