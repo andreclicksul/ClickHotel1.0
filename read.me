@@ -25,16 +25,15 @@ Alterou algum arquivo
     2024-01-14 14:48:21.778
 
 
-.env api
-DATABASE_URL="postgresql://clickhotel:jRQnOdqmKNhlrzoL@localhost:15432/clickhotel?schema=public"
+DATABASE_URL="postgresql://clickhotel:jRQnOdqmKNhlrzoL@172.18.0.1:15432/clickhotel_api?schema=public"
 PORT=3001
-URL_TEST=http://localhost:5173
+URL_TEST=http://localhost:8080
 JWT_SECRET=ADSFGDASF4%@$%%SDFGSDFGFewrtewrtgdg6673dsSDFDSD$$@
 PGUSER=clickhotel
-PGHOST=localhost
+PGHOST=172.18.0.1
 PGPASSWORD=jRQnOdqmKNhlrzoL
-PGDATABASE=clickhotel
+PGDATABASE=clickhotel_api
 PGPORT=15432
 NODE_DOCKER_PORT=3001
 
-* Os containers foram criados mas nenhuma porta funciona no localhost
+* Os containers foram criados mas nenhuma porta funciona no localhost, tentar ir pra frente par publicar na aws e ver se funciona lá
