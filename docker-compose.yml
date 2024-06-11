@@ -10,9 +10,23 @@ services:
       POSTGRES_DB: clickhotel_api
       PGDATA: /var/lib/postgresql/data
     ports:
-      - 15432:5432
+      - "15432:5432"
     volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    container_name: pgadmin-clickhotel
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "andre@clicksul.com.br"
+      PGADMIN_DEFAULT_PASSWORD: "PgAdmin2023!"
+    ports:
+      - "16542:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin      
 
   api:
     container_name: api-clickhotel
@@ -25,7 +39,7 @@ services:
     env_file:
       - ./api/.env
     ports:
-      - 3001:3001
+      - "3000:3000"
  
   client:
     container_name: client-clickhotel
@@ -34,34 +48,25 @@ services:
       context: ./app
     env_file:
       - ./app/.env
-    volumes:
-      - client-volume:/var/www/html 
-
-  pgadmin:
-    container_name: pgadmin-clickhotel
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "andre@clicksul.com.br"
-      PGADMIN_DEFAULT_PASSWORD: "PgAdmin2023!"
-    ports:
-      - 16542:80
     depends_on:
-      - postgres
+      - api
 
   nginx:
     container_name: nginx-clickhotel
-    build: ./nginx
+    image: nginx:alpine
+    build: 
+      dockerfile: Dockerfile
+      context: ./nginx
+    restart: always
     ports:
       - 8080:80
-    volumes:
-      - client-volume:/var/www/html
     depends_on:
       - postgres
       - api
       - client
-    network_mode: host
+    volumes:
+      - ./client/build:/var/www/html      
 
 volumes:
-  postgres-data:
-  client-volume:
+  postgres_data:
+  pgadmin_data:
