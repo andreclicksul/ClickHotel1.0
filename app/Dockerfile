@@ -19,9 +19,19 @@ RUN rm -rf /app
 
 WORKDIR /var/www/html
 
+
+FROM nginx:1.25.5 
+
+COPY --from=build /app/dist /www/var/html
+COPY --from=build /app/nginx/nginx.conf /etc/nginx/conf.d/default.conf
+
+RUN rm /etc/nginx/conf.d/default.conf
+
+COPY nginx.conf /etc/nginx/conf.d
+
 # Server
 #FROM nginx:alpine 
-#COPY --from=build /app/build ./usr/share/nginx/html
+#
 
 #RUN chmod +x /usr/share/nginx/html
 

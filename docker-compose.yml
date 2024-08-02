@@ -41,31 +41,30 @@ services:
     ports:
       - "3000:3000"
  
-  client:
-    container_name: client-clickhotel
-    build:
-      dockerfile: Dockerfile
-      context: ./app
-    env_file:
-      - ./app/.env
-    depends_on:
-      - api
+  #client:
+  #  container_name: client-clickhotel
+  #  build:
+  #    dockerfile: Dockerfile
+  #    context: ./app
+  #  env_file:
+  #    - ./app/.env
+  #  depends_on:
+  #    - api
 
-  nginx:
+  client:
     container_name: nginx-clickhotel
     image: nginx:alpine
     build: 
       dockerfile: Dockerfile
-      context: ./nginx
+      context: ./app
     restart: always
     ports:
       - 8080:80
+    env_file:
+      - ./app/.env
     depends_on:
       - postgres
       - api
-      - client
-    volumes:
-      - ./client/build:/var/www/html      
 
 volumes:
   postgres_data:
