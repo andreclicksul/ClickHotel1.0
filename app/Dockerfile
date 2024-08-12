@@ -6,35 +6,21 @@ ENV PATH /app/node_modules/.bin:$PATH
 
 COPY package*.json ./
 
-RUN npm ci --silent
+RUN npm ci 
 
-COPY . ./
+COPY . .
 RUN npm run build
 
-RUN mkdir -p /var/www/html
+FROM nginx:stable-alpine
 
-RUN mv dist/* /var/www/html
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN rm -rf /app
+EXPOSE 8080
 
-WORKDIR /var/www/html
+CMD ["nginx", "-g", "daemon off;"]
 
 
-FROM nginx:1.25.5 
 
-COPY --from=build /app/dist /www/var/html
-COPY --from=build /app/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 
-RUN rm /etc/nginx/conf.d/default.conf
 
-COPY nginx.conf /etc/nginx/conf.d
-
-# Server
-#FROM nginx:alpine 
-#
-
-#RUN chmod +x /usr/share/nginx/html
-
-#EXPOSE 8080
-
-#CMD ["nginx", "-g", "daemon off;"]
