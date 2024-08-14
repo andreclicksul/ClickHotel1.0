@@ -61,6 +61,7 @@ const Login = () => {
 
     try {
       const response = await authenticate(data.email, userData)
+      console.log(response)
       if (response) {
         console.log(getUserLocalStorage('u'))
         navigate('/home')
@@ -69,7 +70,7 @@ const Login = () => {
         setTimeout( () => setInvalidaccess(''), 4000)      
       }
     } catch (e) {
-      console.log(e)
+      //console.log(e)
       setInvalidaccess('Falha na comunicação, tente mais tarde')
       setTimeout( () => setInvalidaccess(''), 4000)      
     }

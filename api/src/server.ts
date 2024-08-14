@@ -7,7 +7,7 @@ import { readPermissionUserIdHandler } from './services/users'
 
 export const app = fastify()
 
-const url = process.env.URL_TEST
+const url = process.env.URL_TEST || 'http://localhost:3333'
 const jwtsecret = process.env.JWT_SECRET
 
 const authUrl: object = {
@@ -19,7 +19,14 @@ const authUrl: object = {
 
 app.register(cors, {
   origin: [`${url}`], // ambiente de teste e de produção
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  allowedHeaders: [
+    'Origin',
+    'X-Requested-With',
+    'Accept',
+    'Content-Type',
+    'Authorization',
+  ],
+  methods: ['GET', 'PUT', 'POST', 'OPTIONS'],
 })
 
 app.register(userRoutes)
