@@ -11,14 +11,14 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-FROM nginx:stable-alpine
+RUN mkdir -p /var/www/html
 
-COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+RUN mv dist/* /var/www/html
 
-EXPOSE 8080
+VOLUME /var/www/html
 
-CMD ["nginx", "-g", "daemon off;"]
+WORKDIR /
+
 
 
 

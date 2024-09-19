@@ -38,6 +38,8 @@ services:
     restart: always
     env_file:
       - ./api/.env
+    expose:
+      - "6000"
     ports:
       - "6000:6000"
  
@@ -48,23 +50,12 @@ services:
       context: ./app
     env_file:
       - ./app/.env
-    depends_on:
-      - api
-    volumes:
-      - app-volume:/var/www/html
-
-  nginx:
-    container_name: nginx-clickhotel
-    build: ./nginx
     ports:
       - 3333:8080
-    volumes:
-      - app-volume:/var/www/html
     depends_on:
-      - app
+      - api
       
 
 volumes:
   postgres_data:
   pgadmin_data:
-  app-volume:

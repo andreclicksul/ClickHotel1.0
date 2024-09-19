@@ -24,6 +24,6 @@ ENTRYPOINT [ "entrypoint.sh" ]
 
 #RUN npx prisma migrate dev
 
-EXPOSE 3000
+CMD ["npm", "start"] 
 
-CMD ["npm", "start"]
+EXPOSE 6000

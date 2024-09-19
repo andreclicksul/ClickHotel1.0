@@ -9,6 +9,9 @@ import {
 
 export async function userRoutes(app: FastifyInstance) {
   // read users
+  app.get('/abc', async (request: FastifyRequest, reply: FastifyReply) => reply.code(200).send({status: 200, msg: 'OKOK'}))
+
+
   app.get('/readusers', async (request: FastifyRequest, reply: FastifyReply) => 
     await readUsersHandler(request, reply))
 
