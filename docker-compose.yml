@@ -13,6 +13,8 @@ services:
       - "15432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - networkClick
 
   pgadmin:
     container_name: pgadmin-clickhotel
@@ -27,6 +29,8 @@ services:
       - postgres
     volumes:
       - pgadmin_data:/var/lib/pgadmin      
+    networks:
+      - networkClick
 
   api:
     container_name: api-clickhotel
@@ -39,7 +43,9 @@ services:
     env_file:
       - ./api/.env
     ports:
-      - "6000:6000"
+      - 6000:6000
+    networks:
+      - networkClick
  
   app:
     container_name: app-clickhotel
@@ -52,6 +58,8 @@ services:
       - api
     volumes:
       - app-volume:/var/www/html
+    networks:
+      - networkClick
 
   nginx:
     container_name: nginx-clickhotel
@@ -62,7 +70,12 @@ services:
       - app-volume:/var/www/html
     depends_on:
       - app
-      
+    networks:
+      - networkClick
+
+networks:
+  networkClick:
+    driver: bridge      
 
 volumes:
   postgres_data:

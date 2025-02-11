@@ -18,9 +18,3 @@ RUN mv dist/* /var/www/html
 VOLUME /var/www/html
 
 WORKDIR /
-
-
-
-
-
-

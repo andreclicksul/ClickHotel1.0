@@ -10,11 +10,18 @@ export const app = fastify()
 const url = process.env.URL_TEST
 const jwtsecret = process.env.JWT_SECRET
 
+/*
 const authUrl: object = {
   '/readusers': true,
   '/readuser/:id': true,
   '/readpermissionuser/:id': true,
   '/createuser': true,
+}
+*/
+const authUrl: object = {
+  '/readusers': true,
+  '/readuser/:id': true,
+  '/readpermissionuser/:id': true,
 }
 
 app.register(cors, {
@@ -49,6 +56,7 @@ const PORT = process.env.NODE_DOCKER_PORT
 app
   .listen({
     port: Number(PORT),
+    host: '0.0.0.0',
   })
   .then(() => {
     console.log(` Server started on port ${PORT}!`)
