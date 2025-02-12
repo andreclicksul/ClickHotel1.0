@@ -1,5 +1,6 @@
-Backend
-    1 - ok
+Não está conectando com as informações do banco, alterei o arquivo
+services\users.ts mo api para verificar que tipo de erro
+está retornando, 
 
 
 
@@ -12,7 +13,20 @@ Para rodar o docker compose
     * docker compose up -d
 
 Parar todos os containers
-    * docker compose down
+    * docker compose down -v
+
+Para verificar as tabelas diretamente no postgres
+    * docker exec -it postgres-clickhotel psql -U clickhotel -d clickhotel_api
+    * \dt
+
+Para conectar o pgadmin no POSTGRES
+    * colocar o ip do gatway que aparece no inspect do docker no postgres como host name.
+    * Colocar as informações de database, user e password de acordo com o docker-compose.
+
+
+Para enviar novas migrations criadas para o postgres
+    * docker exec -it api-clickhotel npx prisma migrate dev
+
 
 Alterou algum arquivo   
     * docker compose down
@@ -35,191 +49,3 @@ PGPASSWORD=jRQnOdqmKNhlrzoL
 PGDATABASE=clickhotel_api
 PGPORT=15432
 NODE_DOCKER_PORT=3001
-
-* Docker funcionando
-* agora o "http://localhost:6000/abc" - funciona no vscode mas não comunica entre o react e o node
-* inserir usuário e fazer login para dar continuidade no cadastro de clientes
-
-* testar dentro do container do nginx curl "http://api-clickhotel:6000/abc"
-
-
-não estou conseguindo expor a porta do backend para fora do docker, para que seja acessada no navegador, ou seja, não consigo
-que o Frontend se comunique com o backend, por favor analise os dockerfile do frontend, backend, nginx e o docker-compose.yml e 
-me diga se há algum erro ou algo que eu possa alterar para que a comunicação aconteça:
-
-dockerfile do backend:
-
-FROM node:latest as build
-WORKDIR /api
-ENV PATH /api/node_modules/.bin:$PATH
-COPY package*.json ./
-RUN npm ci --silent
-COPY . ./
-RUN npm run build
-
-FROM node:latest
-WORKDIR /api
-
-COPY --from=build /api/node_modules ./node_modules
-COPY --from=build /api/package*.json ./
-COPY --from=build /api/build ./
-COPY --from=build /api/prisma/schema.prisma ./prisma/
-COPY --from=build /api/prisma/migrations/ ./prisma/
-COPY --from=build /api/entrypoint.sh /usr/local/bin
-
-RUN chmod +x /usr/local/bin/entrypoint.sh
-
-RUN npm config set update-notifier false
-
-ENTRYPOINT [ "entrypoint.sh" ]
-
-#RUN npx prisma migrate dev
-
-EXPOSE 6000
-
-CMD ["npm", "start"] 
-
-
-
-dockerfile do frontend:
-
-FROM node:18-alpine as build
-
-WORKDIR /app
-
-ENV PATH /app/node_modules/.bin:$PATH
-
-COPY package*.json ./
-
-RUN npm ci 
-
-COPY . .
-RUN npm run build
-
-RUN mkdir -p /var/www/html
-
-RUN mv dist/* /var/www/html
-
-VOLUME /var/www/html
-
-WORKDIR /
-
-
-dockerfile do nginx:
-
-FROM nginx:stable-alpine
-
-RUN rm /etc/nginx/conf.d/default.conf
-
-COPY nginx.conf /etc/nginx/conf.d
-
-
-arquivo nginx.conf:
-
-server {
-    listen 8080;
-
-    location / {
-        root /var/www/html;
-        index index.html index.htm;
-        try_files $uri $uri/ /index.html;
-    }
-
-    error_page 500 502 503 504  /50x.html;
- 
-    error_page 405 =200 $uri;
-
-    location = /50x.html {
-        root  /usr/share/nginx/html;
-    }
-
-    # Configurações adicionais podem ser adicionadas aqui, se necessário
-}
-
-
-
-docker-compose:
-
-version: "4"
-services:
-  postgres:
-    container_name: postgres-clickhotel
-    image: postgres:latest
-    restart: always
-    environment:
-      POSTGRES_USER: clickhotel
-      POSTGRES_PASSWORD: jRQnOdqmKNhlrzoL
-      POSTGRES_DB: clickhotel_api
-      PGDATA: /var/lib/postgresql/data
-    ports:
-      - "15432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    networks:
-      - networkClick
-
-  pgadmin:
-    container_name: pgadmin-clickhotel
-    image: dpage/pgadmin4
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "andre@clicksul.com.br"
-      PGADMIN_DEFAULT_PASSWORD: "PgAdmin2023!"
-    ports:
-      - "16542:80"
-    depends_on:
-      - postgres
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin      
-    networks:
-      - networkClick
-
-  api:
-    container_name: api-clickhotel
-    depends_on:
-      - postgres
-    build:
-      dockerfile: Dockerfile
-      context: ./api
-    restart: always
-    env_file:
-      - ./api/.env
-    ports:
-      - 6000:6000
-    networks:
-      - networkClick
- 
-  app:
-    container_name: app-clickhotel
-    build:
-      dockerfile: Dockerfile
-      context: ./app
-    env_file:
-      - ./app/.env
-    depends_on:
-      - api
-    volumes:
-      - app-volume:/var/www/html
-    networks:
-      - networkClick
-
-  nginx:
-    container_name: nginx-clickhotel
-    build: ./nginx
-    ports:
-      - 3333:8080
-    volumes:
-      - app-volume:/var/www/html
-    depends_on:
-      - app
-    networks:
-      - networkClick
-
-networks:
-  networkClick:
-    driver: bridge      
-
-volumes:
-  postgres_data:
-  pgadmin_data:
-  app-volume:

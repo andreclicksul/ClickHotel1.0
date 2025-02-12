@@ -40,7 +40,7 @@ export const loginRouterHandler = async (
       },
     })
 
-    if (registerUser.length === 0) throw new Error()
+    if (registerUser.length === 0) throw new Error('erro1')
 
     const objectUser = registerUser[0]
 
@@ -56,7 +56,7 @@ export const loginRouterHandler = async (
       user.finishminute,
     )
 
-    if (!checkPassword || !isPermission || diftime) throw new Error()
+    if (!checkPassword || !isPermission || diftime) throw new Error('erro2')
 
     const token = app.jwt.sign(user, { expiresIn: '8h' })
 

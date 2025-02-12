@@ -9,6 +9,7 @@ COPY package*.json ./
 RUN npm ci 
 
 COPY . .
+COPY .env.production .env
 RUN npm run build
 
 RUN mkdir -p /var/www/html

@@ -10,19 +10,19 @@ export const app = fastify()
 const url = process.env.URL_TEST
 const jwtsecret = process.env.JWT_SECRET
 
+const authUrl: object = {
+  '/readusers': true,
+  '/readuser/:id': true,
+  '/readpermissionuser/:id': true,
+  // '/createuser': true,
+}
 /*
 const authUrl: object = {
   '/readusers': true,
   '/readuser/:id': true,
   '/readpermissionuser/:id': true,
-  '/createuser': true,
 }
 */
-const authUrl: object = {
-  '/readusers': true,
-  '/readuser/:id': true,
-  '/readpermissionuser/:id': true,
-}
 
 app.register(cors, {
   origin: [`${url}`], // ambiente de teste e de produção

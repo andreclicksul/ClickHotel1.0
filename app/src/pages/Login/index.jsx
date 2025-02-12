@@ -61,9 +61,9 @@ const Login = () => {
 
     try {
       const response = await authenticate(data.email, userData)
-      console.log(response)
+      //console.log(response)
       if (response) {
-        console.log(getUserLocalStorage('u'))
+        //console.log(getUserLocalStorage('u'))
         navigate('/home')
       } else {
         setInvalidaccess('Você não tem permissão de acesso')
