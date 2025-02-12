@@ -21,6 +21,8 @@ export const AuthProvider = ({ children }) => {
 
   const authenticate = async (email, Data) => {
 
+    console.log("API URL:", import.meta.env.VITE_API_URL);
+
     const response = await post('/authenticate', Data)
     //const response = await post('login.php', Data)
 
