@@ -29,7 +29,6 @@ export const AuthProvider = ({ children }) => {
         iduser: response.iduser,
         email
       }
-      console.log(payload)
       setUser(payload)
       setUserLocalStorage("u", payload)
       return true

@@ -6,6 +6,8 @@ export const Private = ({ children }) => {
 
   const { authenticated, loading } = useContext(AuthContext)
 
+  console.log(authenticated)
+
   if (loading) {
     return (
       <div className="loading">

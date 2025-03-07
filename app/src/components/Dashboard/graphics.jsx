@@ -16,16 +16,16 @@ const GraphicsDashboad = () => {
   const readGraph = async () => {
 
     try {
-      let data1 = []
-      let data2 = []
+      let data1 = [10, 20, 15, 16, 23, 54]
+      let data2 = [3, 8, 25, 12, 13, 21]
 
-      const response = await get(`dashboard.php?op=3`)
+      //const response = await get(`dashboard.php?op=3`)
 
-      response.res1.forEach(element => data1.push({mounth: element.textdtpayment, Valor: parseInt(element.valuepay)}))
+      //response.res1.forEach(element => data1.push({mounth: element.textdtpayment, Valor: parseInt(element.valuepay)}))
 
       setGraph1(data1)
 
-      response.res2.forEach(element => data2.push({mounth: element.textdtpayment, Valor: parseInt(element.valuepay)}))
+      //response.res2.forEach(element => data2.push({mounth: element.textdtpayment, Valor: parseInt(element.valuepay)}))
 
       setGraph2(data2)
 

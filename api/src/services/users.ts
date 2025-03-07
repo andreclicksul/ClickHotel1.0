@@ -40,6 +40,8 @@ export const loginRouterHandler = async (
       },
     })
 
+    // verificar aqui o registerUser talvez mudar o prisma par localizar apenas o email inicial
+
     if (registerUser.length === 0) throw new Error('erro1')
 
     const objectUser = registerUser[0]
@@ -66,7 +68,9 @@ export const loginRouterHandler = async (
       status: 200,
     })
   } catch (error) {
-    reply.code(401).send({ status: 401, msg: 'erro de autenticação', error })
+    reply
+      .code(402)
+      .send({ status: 402, msg: 'erro de autenticação' + '=' + error, error })
   }
 }
 

@@ -14,7 +14,8 @@ const authUrl: object = {
   '/readusers': true,
   '/readuser/:id': true,
   '/readpermissionuser/:id': true,
-  // '/createuser': true,
+  '/createuser': true,
+  '/authenticate': false,
 }
 /*
 const authUrl: object = {
@@ -36,18 +37,24 @@ app.register(fastifyJwt, {
 })
 
 app.addHook('onRequest', async (req, reply) => {
+  /*
+  const publicRoutes = ['/authenticate']
+  if (publicRoutes.includes(path)) {
+    return
+  }
+  */
+
+  const path: string = req.routerPath || ''
+
   try {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const path: string = req.routeOptions.url
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
     if (authUrl[path]) {
-      readPermissionUserIdHandler(req, reply)
       await req.jwtVerify()
+      readPermissionUserIdHandler(req, reply)
     }
   } catch (error) {
-    reply.code(401).send({ msg: 'Sessão encerrada', error })
+    reply.code(403).send({ msg: 'Sessão encerrada', error })
   }
 })
 

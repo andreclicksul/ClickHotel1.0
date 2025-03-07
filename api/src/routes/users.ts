@@ -9,8 +9,7 @@ import {
 
 export async function userRoutes(app: FastifyInstance) {
   // read users
-  app.get('/abc', async (request: FastifyRequest, reply: FastifyReply) => reply.code(200).send({status: 200, msg: 'OKOK'}))
-
+  app.get('/abc', async (request: FastifyRequest, reply: FastifyReply) => reply.code(200).send({status: 200, iduser: 2, token: 'OKOK'}))
 
   app.get('/readusers', async (request: FastifyRequest, reply: FastifyReply) => 
     await readUsersHandler(request, reply))
@@ -23,8 +22,7 @@ export async function userRoutes(app: FastifyInstance) {
   app.post('/createuser', async (request: FastifyRequest, reply: FastifyReply) => 
     await createUserHandler(request, reply))
 
-  // user authenticate
+  // Authenticate
   app.post('/authenticate', async (request: FastifyRequest, reply: FastifyReply) => 
     await loginRouterHandler(request, reply))
-
 }
