@@ -9,7 +9,7 @@ import { useContext } from "react"
 import Header from '../components/Main/header'
 import Aside from '../components/Main/aside'
 import Footer from '../components/Main/footer'
-import Container from '../components/Container'
+import Container from '../components/Container' 
 import { AuthContext } from '../contexts/context'
 import { MainProvider } from '../contexts/main'
 

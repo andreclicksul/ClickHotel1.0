@@ -1,38 +1,30 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { getUserLocalStorage, setUserLocalStorage } from "../services/api"
 import { AuthContext } from "./context"
 import { post } from "../services/api"
 
 export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(getUserLocalStorage("u") ?? null)
+  const [loading, setLoading] = useState(user === null)
+  const [forgotsend, setForgotsend] = useState(false)
 
-  const [ user, setUser ] = useState(null)
+  const authenticate = async (email, data) => {
+    try {
+      const response = await post("/authenticate", data)
 
-  const [ loading, setLoading ] = useState(true)  
+      console.log(response)
 
-  const [ forgotsend, setForgotsend ] = useState(false)
-
-  useEffect(() => {
-    const user = getUserLocalStorage("u")
-    if (user) {
-      setUser(user)
-    }
-    setLoading(false)
-  }, [])
-
-  const authenticate = async (email, Data) => {
-
-    const response = await post('/authenticate', Data)
-  
-    if (response.status == 200) {
-      const payload = { 
-        token: response.token, 
-        iduser: response.iduser,
-        email
+      if (response.status === 200) {
+        const payload = { ...response, email }
+        setUser(payload)
+        setUserLocalStorage("u", payload)
+        return true
       }
-      setUser(payload)
-      setUserLocalStorage("u", payload)
-      return true
-    } else {
+
+      logout()
+      return false
+
+    } catch (error) {
       logout()
       return false
     }
@@ -40,16 +32,20 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     setUser(null)
-    localStorage.clear()
+    localStorage.removeItem("u")
   }
 
   return (
-    <AuthContext.Provider value={{user, authenticated: !!user, authenticate, logout, loading, updateForgotsend: setForgotsend, forgotsend }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      authenticated: Boolean(user), 
+      authenticate, 
+      logout, 
+      loading, 
+      updateForgotsend: setForgotsend, 
+      forgotsend 
+    }}>
       {children}
     </AuthContext.Provider>
   )
-  
 }
-
-
-

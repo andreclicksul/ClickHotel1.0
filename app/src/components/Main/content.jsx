@@ -9,32 +9,27 @@ import GraphicsDashboad from "../Dashboard/graphics"
 const Content = () => {
 
   const { innerHeight: height } = window
-
-  const { permissions } = useContext(MainContext)  
+  const { permissions } = useContext(MainContext)
+  const billing = permissions.billing >= 3
+  const financeiro = permissions.financeiro >= 4
 
   return (
-    <> 
+    <>
       <section className="content-header">
-        <h1>
-          Dashboard
-        </h1>
+        <h1>Dashboard</h1>
       </section>
 
-      <section className="content" style={{minHeight: `${innerHeight-142}px` }}>
+      <section className="content" style={{minHeight: `${height-142}px`}}>
         <span id="typeForm" className="ls-display-none">dashboard</span>
         <section className="content">
           <BillingProvider>
             <DashboardAlerts />
-            { permissions.billing >= 3 &&
-              <BillingModule />
-            }
+            { billing && <BillingModule /> }
             <div className="row">
-              { permissions.financeiro == 4 &&
-                <GraphicsDashboad />
-              }
+              { financeiro && <GraphicsDashboad /> }
               <RecentClients />
             </div>
-          </BillingProvider>            
+          </BillingProvider>
         </section>
       </section>
     </>

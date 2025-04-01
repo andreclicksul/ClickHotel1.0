@@ -33,9 +33,9 @@ const ModalBilling = ({dataform}) => {
 
     try {
 
-       const response = await post('dashboard.php', data)
-
-      updateBillings(response.billing)
+      //const response = await post('dashboard.php', data)
+      //updateBillings(response.billing)
+      updateBillings([])
 
     } catch (e) {
       logout(302)

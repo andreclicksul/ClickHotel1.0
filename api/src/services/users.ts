@@ -12,7 +12,6 @@ import {
 } from '../schemas/users'
 import { findUserAuthentication } from '../middlewares/user.services'
 
-// user authenticate
 export const loginRouterHandler = async (
   request: FastifyRequest,
   reply: FastifyReply,
@@ -40,8 +39,6 @@ export const loginRouterHandler = async (
       },
     })
 
-    // verificar aqui o registerUser talvez mudar o prisma par localizar apenas o email inicial
-
     if (registerUser.length === 0) throw new Error('erro1')
 
     const objectUser = registerUser[0]
@@ -49,16 +46,28 @@ export const loginRouterHandler = async (
     const { user, isPermission, passwordHash } =
       await findUserAuthentication(objectUser)
 
-    const checkPassword = await bcrypt.compare(password, passwordHash)
-
-    const diftime = difTime(
-      user.starthour,
-      user.startminute,
-      user.finishhour,
-      user.finishminute,
-    )
-
-    if (!checkPassword || !isPermission || diftime) throw new Error('erro2')
+    if (
+      !(await bcrypt.compare(password, passwordHash)) ||
+      !isPermission ||
+      difTime(
+        user.starthour,
+        user.startminute,
+        user.finishhour,
+        user.finishminute,
+      )
+    ) {
+      throw new Error(
+        `Authentication failed. 
+        Password is incorrect: ${await bcrypt.compare(password, passwordHash)}
+        Permission denied: ${isPermission}
+        Time restriction: ${difTime(
+          user.starthour,
+          user.startminute,
+          user.finishhour,
+          user.finishminute,
+        )}`,
+      )
+    }
 
     const token = app.jwt.sign(user, { expiresIn: '8h' })
 
@@ -68,9 +77,7 @@ export const loginRouterHandler = async (
       status: 200,
     })
   } catch (error) {
-    reply
-      .code(402)
-      .send({ status: 402, msg: 'erro de autenticação' + '=' + error, error })
+    reply.code(402).send({ status: 402, msg: `${error}` })
   }
 }
 

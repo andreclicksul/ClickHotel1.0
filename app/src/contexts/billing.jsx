@@ -14,33 +14,38 @@ export const BillingProvider = ({ children }) => {
 
   const readBilling = async () => {
 
-    try {
-      const response = await get(`dashboard.php?op=1&email=${user.email}&token=${user.token}`)
+    //try {
+      //const response = await get(`dashboard.php?op=1&email=${user.email}&token=${user.token}`)
+      //setDatabillings(response.billing)
+      const response = []
+      setDatabillings(response)
 
-      setDatabillings(response.billing)
 
-    } catch (e) {
-      logout('301')
-      return     
-    } 
+    //} catch (e) {
+    //  logout('301')
+    //  return     
+    //} 
   }
 
   const readDash = async () => {
 
-    try {
+    //try {
+      /*
       const response = await get(`dashboard.php?op=0&email=${user.email}&token=${user.token}`)
-
       if (response.status != 200) {
         logout(response.status)
         return
       }
 
       setDatadash(response.dash)
+      */
+      const response = []
+      setDatadash(response)
 
-    } catch (e) {
-      logout('301')
-      return     
-    } 
+    //} catch (e) {
+    //  logout('301')
+    //  return     
+    //} 
   }  
 
   return (
@@ -48,7 +53,8 @@ export const BillingProvider = ({ children }) => {
       { 
         databillings, 
         datadash, 
-        dataclients: datadash.clients, 
+        //dataclients: datadash.clients, 
+        dataclients: datadash, 
         updateBillings: setDatabillings, 
         readBilling, 
         readDash

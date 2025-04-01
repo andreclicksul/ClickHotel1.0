@@ -28,10 +28,7 @@ export const post = async (url, Data) => {
   return request.data
 }
 
-export const get = async (url) => {
-  const response = await api.get(url)
-  return response.data
-}
+export const get = async (url) => (await api.get(url)).data
 
 export const getCep = async (cep) => {
   const response = await apiCep.get(`${cep}/json/`)

@@ -4,83 +4,75 @@ import { AuthContext } from "../../contexts/context"
 import { getUserLocalStorage } from "../../services/api"
 
 const Login = () => {
-
   const navigate = useNavigate()
-
-  const code = useParams()
-
+  const { errcode } = useParams()
+  const errorCode = parseInt(errcode, 10)
   const { authenticate } = useContext(AuthContext)
 
-  const [data, setData] = useState({
-    email: "",
-    password: ""
-  })
-
+  const [data, setData] = useState({ email: "", password: "" })
+  const [loading, setLoading] = useState(false)
   const [wronguser, setWronguser] = useState("")
   const [wrongpass, setWrongpass] = useState("")
   const [invalidAccess, setInvalidaccess] = useState("")
 
-  useEffect( () => {
-    if (JSON.stringify(code) === '{}') return
+  useEffect(() => {
+    if (!errorCode) return
 
-    if (code.errcode == 300) setInvalidaccess('Sessão Encerrada')
-    if (code.errcode == 301) setInvalidaccess('Você não tem permissão de acesso')
-    if (code.errcode == 302) setInvalidaccess('Falha na comunicação, tente mais tarde')
+    const messages = {
+      300: 'Sessão Encerrada',
+      301: 'Você não tem permissão de acesso',
+      302: 'Falha na comunicação, tente mais tarde',
+    }
 
-    setTimeout( () => setInvalidaccess(''), 4000) 
-  }, [])
+    setInvalidaccess(messages[errorCode] || '')
+    const timer = setTimeout(() => setInvalidaccess(''), 4000)
+    return () => clearTimeout(timer)
+  }, [errorCode])
 
   const handleChange = (e) => {
-    const value = e.target.value
-    setData({
-      ...data,
-      [e.target.name]: value
-    })
+    const { name, value } = e.target
+    setData((prevData) => ({ ...prevData, [name]: value }))
   }
 
   const handleSubmit = async (form) => {
-
     form.preventDefault()
+    if (loading) return
 
-    const userData = {
-      email: data.email,
-      password: data.password
-    }
+    setLoading(true)
+    const { email, password } = data
 
-    if (data.email == '') {
-      setWronguser('Favor digitar o email')
-      setTimeout( () => setWronguser(''), 4000)
-      return
-    }
-
-    if (data.password == '') {
-      setWrongpass('Favor digitar a senha')
-      setTimeout( () => setWrongpass(''), 4000);     
+    if (!email || !password) {
+      if (!email) setWronguser('Favor digitar o email')
+      if (!password) setWrongpass('Favor digitar a senha')
+      setTimeout(() => {
+        setWronguser('')
+        setWrongpass('')
+      }, 4000)
+      setLoading(false)
       return
     }
 
     try {
-      const response = await authenticate(data.email, userData)
-      //console.log(response)
+      const response = await authenticate(email, data)
       if (response) {
-        //console.log(getUserLocalStorage('u'))
+        setInvalidaccess('Autenticado com sucesso')
         navigate('/home')
       } else {
         setInvalidaccess('Você não tem permissão de acesso')
-        setTimeout( () => setInvalidaccess(''), 4000)      
+        setTimeout(() => setInvalidaccess(''), 4000)
       }
-    } catch (e) {
+    } catch {
       setInvalidaccess('Falha na comunicação, tente mais tarde')
-      setTimeout( () => setInvalidaccess(''), 4000)      
+      setTimeout(() => setInvalidaccess(''), 4000)
+    } finally {
+      setLoading(false)
     }
   }
-  
+
   return (
     <div>
       <div className="login-box">
-        <div className="login-logo">
-          <b>Sistema Clicksul</b>
-        </div>
+        <div className="login-logo"><b>Sistema Clicksul</b></div>
         <div className="login-box-body">
           <p className="login-box-msg">
             <b><span>Faça o login para iniciar sua sessão</span></b><br />
@@ -89,23 +81,23 @@ const Login = () => {
 
           <form onSubmit={handleSubmit}>
             <div className="form-group has-feedback has-error">
-              <input 
-                type="text" 
-                className="form-control" 
-                placeholder="E-mail" 
-                name="email" 
+              <input
+                type="text"
+                className="form-control"
+                placeholder="E-mail"
+                name="email"
                 onChange={handleChange}
               />
               <span className="glyphicon glyphicon-user form-control-feedback"></span>
               <span id="wrong-user" className="help-block">{wronguser}</span>
             </div>
             <div className="form-group has-feedback has-error">
-              <input 
-                type="password" 
-                id="password" 
-                className="form-control" 
-                placeholder="Password" 
-                name="password" 
+              <input
+                type="password"
+                id="password"
+                className="form-control"
+                placeholder="Password"
+                name="password"
                 onChange={handleChange}
               />
               <span className="glyphicon glyphicon-lock form-control-feedback"></span>
@@ -114,13 +106,13 @@ const Login = () => {
             <div className="row">
               <div className="col-xs-8">
                 <div className="checkbox icheck">
-                  <label>
-                    <Link to="/forgot">Esqueci minha senha</Link>
-                  </label>
+                  <label><Link to="/forgot">Esqueci minha senha</Link></label>
                 </div>
               </div>
               <div className="col-xs-4">
-                <button className="btn btn-primary btn-block btn-flat" type="submit">Sign In</button>
+                <button className="btn btn-primary btn-block btn-flat" type="submit" disabled={loading}>
+                  {loading ? "Carregando..." : "Sign In"}
+                </button>
               </div>
             </div>
           </form>

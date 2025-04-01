@@ -46,7 +46,7 @@ export const MainProvider = ({ children }) => {
 
     try {
       const response = await get(`/readpermissionuser${user.iduser}`)
-
+ 
       if (response.status != 200) {
         logout()
         navigate(`/${response.status}`)

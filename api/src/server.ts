@@ -14,7 +14,6 @@ const authUrl: object = {
   '/readusers': true,
   '/readuser/:id': true,
   '/readpermissionuser/:id': true,
-  '/createuser': true,
   '/authenticate': false,
 }
 /*

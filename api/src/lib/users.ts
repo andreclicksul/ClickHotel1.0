@@ -1,20 +1,13 @@
 export const difTime = (HH1: string, mm1: string, HH2: string, mm2: string) => {
-  const dateStart = new Date(2023, 1, 1, parseInt(HH1) - 3, parseInt(mm1))
-  const dateFinish = new Date(2023, 1, 1, parseInt(HH2) - 3, parseInt(mm2))
+  const dateStart = new Date()
+  dateStart.setHours(parseInt(HH1), parseInt(mm1), 0, 0)
 
-  const toDay = new Date()
-  const HH3: number = toDay.getHours() - 3
-  const mm3: number = toDay.getMinutes()
+  const dateFinish = new Date()
+  dateFinish.setHours(parseInt(HH2), parseInt(mm2), 0, 0)
 
-  const _now = new Date(2023, 1, 1, HH3, mm3)
+  const now = new Date()
 
-  let res = false
-
-  if (
-    _now.getTime() < dateStart.getTime() ||
-    _now.getTime() > dateFinish.getTime()
-  )
-    res = true
-
-  return res
+  return dateStart > dateFinish
+    ? !(now >= dateStart || now <= dateFinish)
+    : now < dateStart || now > dateFinish
 }
