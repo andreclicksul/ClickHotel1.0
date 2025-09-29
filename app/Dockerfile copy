@@ -1,0 +1,22 @@
+FROM node:18-alpine as build
+
+WORKDIR /app
+
+ENV PATH /app/node_modules/.bin:$PATH
+
+COPY package*.json ./
+
+RUN npm ci 
+
+COPY . .
+COPY .env.production .env
+RUN npm run build
+
+RUN mkdir -p /var/www/html
+
+# RUN mv dist/* /var/www/html
+RUN cp -r dist/* /var/www/html
+
+VOLUME /var/www/html
+
+WORKDIR /

@@ -1,4 +1,4 @@
-.box.box-purple {
+.card.card-purple {
   border-top-color: #605ca8;
 }
 
@@ -47,8 +47,23 @@
 }
 
 .fontTitle {
-  font-size: 20px;
-  font-weight: bold;
+  font-family: 'Source Sans Pro','Helvetica Neue',Helvetica,Arial,sans-serif;
+  font-weight: 700;
+  font-size: 35px;
+}
+
+.login-alert {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: opacity 0.4s ease, max-height 0.4s ease;
+  margin-bottom: 0;
+}
+
+.login-alert--visible {
+  opacity: 1;
+  max-height: 80px;
+  margin-bottom: 16px;
 }
 
 .ls-label {
@@ -96,4 +111,7 @@
 
 .width10px {
   width: 10px;
+}
+.login-page .login-box {
+  margin-top: -10vh;
 }

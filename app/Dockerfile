@@ -12,11 +12,10 @@ COPY . .
 COPY .env.production .env
 RUN npm run build
 
-RUN mkdir -p /var/www/html
-
-# RUN mv dist/* /var/www/html
-RUN cp -r dist/* /var/www/html
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 VOLUME /var/www/html
 
-WORKDIR /
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["sleep", "infinity"]

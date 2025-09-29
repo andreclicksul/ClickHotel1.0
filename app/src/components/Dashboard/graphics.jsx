@@ -3,35 +3,60 @@ import { MainContext } from '../../contexts/context'
 import { get } from '../../services/api';
 import GraphicRechart from '../Graphics';
 
+const DEFAULT_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
+const SAMPLE_REVENUE = [10, 20, 15, 16, 23, 54]
+const SAMPLE_EXPENSE = [3, 8, 25, 12, 13, 21]
+
+const ensureChartData = (entries = []) => {
+  return entries.map((entry, index) => {
+    if (entry == null) {
+      return {
+        mounth: DEFAULT_LABELS[index] ?? `Item ${index + 1}`,
+        Valor: 0,
+      }
+    }
+
+    if (typeof entry === 'number') {
+      return {
+        mounth: DEFAULT_LABELS[index] ?? `Item ${index + 1}`,
+        Valor: entry,
+      }
+    }
+
+    const label = entry.mounth ?? entry.textdtpayment ?? entry.label ?? DEFAULT_LABELS[index] ?? `Item ${index + 1}`
+    const value = Number(entry.Valor ?? entry.value ?? entry.valuepay ?? entry.total ?? entry.amount ?? 0)
+
+    return {
+      mounth: label,
+      Valor: Number.isFinite(value) ? value : 0,
+    }
+  })
+}
+
 const GraphicsDashboad = () => {
 
   const { logout } = useContext(MainContext)
 
   const [ readonly, setReadonly ] = useState(false)
 
-  const [ graph1, setGraph1 ] = useState([])
-  
-  const [ graph2, setGraph2 ] = useState([])
+  const [ graph1, setGraph1 ] = useState(() => ensureChartData(SAMPLE_REVENUE))
+
+  const [ graph2, setGraph2 ] = useState(() => ensureChartData(SAMPLE_EXPENSE))
 
   const readGraph = async () => {
 
     try {
-      let data1 = [10, 20, 15, 16, 23, 54]
-      let data2 = [3, 8, 25, 12, 13, 21]
+      const response = await get('dashboard.php?op=3')
+      const income = ensureChartData(response?.res1 ?? [])
+      const expenses = ensureChartData(response?.res2 ?? [])
 
-      //const response = await get(`dashboard.php?op=3`)
-
-      //response.res1.forEach(element => data1.push({mounth: element.textdtpayment, Valor: parseInt(element.valuepay)}))
-
-      setGraph1(data1)
-
-      //response.res2.forEach(element => data2.push({mounth: element.textdtpayment, Valor: parseInt(element.valuepay)}))
-
-      setGraph2(data2)
+      setGraph1(income.length ? income : ensureChartData(SAMPLE_REVENUE))
+      setGraph2(expenses.length ? expenses : ensureChartData(SAMPLE_EXPENSE))
 
     } catch (e) {
+      setGraph1(ensureChartData(SAMPLE_REVENUE))
+      setGraph2(ensureChartData(SAMPLE_EXPENSE))
       logout('301')
-      return
     }
   }
 
@@ -45,38 +70,38 @@ const GraphicsDashboad = () => {
   return (
     <>
       <div className="col-md-7">
-        <div className="box box-primary collapsed-box">
-          <div className="box-header with-border">
+        <div className="card card-primary collapsed-card">
+          <div className="card-header">
             <span id="opgraph1" className="ls-display-none">0</span>
             <a href="#" id="divGraph1">
-              <h3 className="box-title text-black">Receita</h3>
+              <h3 className="card-title text-black">Receita</h3>
             </a>
-            <div className="box-tools pull-right">
-              <button type="button" className="btn btn-box-tool" data-widget="collapse">
-                <i id="typeButton1" className="fa fa-plus"></i>
+            <div className="card-tools">
+              <button type="button" className="btn btn-tool" data-card-widget="collapse">
+                <i id="typeButton1" className="fas fa-plus"></i>
               </button>
             </div>
           </div>
-          <div className="box-body chart-responsive">
-            <div className="chart" id="chart1" style={{Heigh: '300px'}}>
+          <div className="card-body">
+            <div className="chart" id="chart1" style={{ height: '300px' }}>
               <GraphicRechart data={graph1} barcolor={"#3c8dbc"} />
             </div>
           </div>
         </div>
-        <div className="box box-danger collapsed-box">
-          <div className="box-header with-border">
+        <div className="card card-danger collapsed-card">
+          <div className="card-header">
             <span id="opgraph2" className="ls-display-none">0</span>
             <a href="#" id="divGraph2">
-              <h3 className="box-title text-black">Despesas</h3>
+              <h3 className="card-title text-black">Despesas</h3>
             </a>
-            <div className="box-tools pull-right">
-              <button type="button" className="btn btn-box-tool" data-widget="collapse">
-                <i id="typeButton2" className="fa fa-plus"></i>
+            <div className="card-tools">
+              <button type="button" className="btn btn-tool" data-card-widget="collapse">
+                <i id="typeButton2" className="fas fa-plus"></i>
               </button>
             </div>
           </div>
-          <div className="box-body chart-responsive">
-            <div className="chart" id="chart2" style={{Heigh: '300px'}}>
+          <div className="card-body">
+            <div className="chart" id="chart2" style={{ height: '300px' }}>
               <GraphicRechart data={graph2} barcolor={"#dd4b39"} />
             </div>
           </div>

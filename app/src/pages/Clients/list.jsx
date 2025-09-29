@@ -102,18 +102,18 @@ const ListAll = () => {
         <section className="content" style={{minHeight: `${innerHeight-142}px` }}>  
           <div className="row">
             <div className="col-md-12">
-              <div className="box box-warning">
-                <div className="box-header">
-                  <h3 className="box-title"><span className="fontTitle">Clientes</span></h3>
-                  <div className="box-tools pull-right">
+              <div className="card card-warning">
+                <div className="card-header d-flex align-items-center">
+                  <h3 className="card-title mb-0"><span className="fontTitle">Clientes</span></h3>
+                  <div className="card-tools">
                     <Link to={`${secinsert == 'nok' ? '/clients/create' : '#'}`}>
-                      <span className={`btn btn-default ${secinsert}`}>
-                        <i className="fa fa-plus-square"></i>&nbsp;&nbsp;&nbsp;Adicionar
+                      <span className={`btn btn-outline-secondary ${secinsert}`}>
+                        <i className="fas fa-plus-square"></i>&nbsp;&nbsp;&nbsp;Adicionar
                       </span>
                     </Link>
                   </div>
                 </div>
-                <div className="box-body">
+                <div className="card-body">
                   <table id="tableClients" className="table table-bordered table-striped">
                   </table>                  
                 </div>

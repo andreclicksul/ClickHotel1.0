@@ -1,7 +1,26 @@
 import { useContext, useState } from "react"
+import ReactDatePicker from 'react-datepicker'
+import ptBR from 'date-fns/locale/pt-BR'
 import { MainContext, AuthContext, BillingContext } from "../../contexts/context"
 import { post } from "../../services/api"
 
+const parseDate = (value) => {
+  if (!value || typeof value !== 'string') return null
+  const parts = value.split(/[\/\-]/)
+  if (parts.length < 3) return null
+  const [day, month, year] = parts.map((part) => parseInt(part, 10))
+  if (!day || !month || !year) return null
+  const parsed = new Date(year, month - 1, day)
+  return Number.isNaN(parsed.getTime()) ? null : parsed
+}
+
+const formatDate = (date) => {
+  if (!(date instanceof Date) || Number.isNaN(date.getTime())) return ''
+  const day = `${date.getDate()}`.padStart(2, '0')
+  const month = `${date.getMonth() + 1}`.padStart(2, '0')
+  const year = date.getFullYear()
+  return `${day}/${month}/${year}`
+}
 
 const ModalBilling = ({dataform}) => {
 
@@ -11,12 +30,15 @@ const ModalBilling = ({dataform}) => {
 
   const { updateBillings } = useContext(BillingContext)
 
+  const [dueDate, setDueDate] = useState(() => parseDate(dataform.dtscheduling))
+
   const [data, setData] = useState({
     op: 2,
     id: dataform.id,
     desuser: user.desuser,
     desstatus: dataform.desstatus,
-    desresult: dataform.desresult
+    desresult: dataform.desresult,
+    dtscheduling: dataform.dtscheduling || ''
   })
 
   const handleChange = (e) => {
@@ -25,6 +47,14 @@ const ModalBilling = ({dataform}) => {
       ...data,
       [e.target.name]: value
     })
+  }
+
+  const handleDateChange = (date) => {
+    setDueDate(date)
+    setData((current) => ({
+      ...current,
+      dtscheduling: formatDate(date)
+    }))
   }
 
   const handleSubmit = async (e) => {
@@ -53,16 +83,20 @@ const ModalBilling = ({dataform}) => {
 
       <form className="form-horizontal" onSubmit={handleSubmit}>
         <div className="modal-body">
-          <div className="box-body">
+          <div className="card-body">
             <div className="form-group">
               <label htmlFor="dtscheduling" className="col-sm-2 control-label">Vencimento</label>
               <div className="col-sm-3">
-                <input 
-                  type="text" 
-                  name="dtscheduling" 
-                  className="form-control text-center disabled"
-                  readOnly
-                  value={dataform.dtscheduling || ''} 
+                <ReactDatePicker
+                  selected={dueDate}
+                  onChange={handleDateChange}
+                  locale={ptBR}
+                  dateFormat="dd/MM/yyyy"
+                  className="form-control text-center"
+                  name="dtscheduling"
+                  placeholderText="Selecione a data"
+                  showPopperArrow={false}
+                  calendarStartDay={1}
                 />
               </div>
               <label htmlFor="dbvalue" className="col-sm-1 control-label">Valor</label>
@@ -182,7 +216,7 @@ const ModalBilling = ({dataform}) => {
           </div>
         </div>
         <div className="modal-footer">
-          <button type="button" id="closeModal" className="btn btn-default pull-left" data-dismiss="modal">Fechar</button>
+          <button type="button" id="closeModal" className="btn btn-outline-secondary pull-left" data-dismiss="modal">Fechar</button>
           <button className="btn btn-primary" type="submit">Atualizar</button>
         </div>
       </form>

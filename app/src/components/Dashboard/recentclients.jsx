@@ -16,15 +16,15 @@ const RecentClients = () => {
 
   return ( 
     <div className="col-md-5">
-      <div className="box box-success">
-        <div className="box-header with-border">
-          <a href="#" id="divClient"><h3 className="box-title text-black">Clientes Adicionados Recentemente</h3></a>
+      <div className="card card-success">
+        <div className="card-header">
+          <a href="#" id="divClient"><h3 className="card-title text-black">Clientes Adicionados Recentemente</h3></a>
 
-          <div className="box-tools pull-right">
-            <button type="button" id="buttonClient" className="btn btn-box-tool" data-widget="collapse"><i className="fa fa-minus"></i></button>
+          <div className="card-tools">
+            <button type="button" id="buttonClient" className="btn btn-tool" data-card-widget="collapse"><i className="fas fa-minus"></i></button>
           </div>
         </div>
-        <div className="box-body no-padding">
+        <div className="card-body p-0">
           <table className="table table-striped">
             <thead>
               <tr>
@@ -42,7 +42,7 @@ const RecentClients = () => {
                   <td>{res.dtregister}</td>
                   <td>
                     <Link to={`/clients/update/${res.idclient}`}>
-                      <span className="badge bg-green">IR</span>
+                      <span className="badge badge-success">IR</span>
                     </Link>
                   </td>
                 </tr>

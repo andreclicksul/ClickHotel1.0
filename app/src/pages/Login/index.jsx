@@ -1,6 +1,7 @@
 import { useState, useContext, useEffect } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { AuthContext } from "../../contexts/context"
+import { FaUser, FaLock } from 'react-icons/fa';
 import { getUserLocalStorage } from "../../services/api"
 
 const Login = () => {
@@ -70,48 +71,60 @@ const Login = () => {
   }
 
   return (
-    <div>
-      <div className="login-box">
-        <div className="login-logo"><b>Sistema Clicksul</b></div>
-        <div className="login-box-body">
-          <p className="login-box-msg">
-            <b><span>Faça o login para iniciar sua sessão</span></b><br />
-            <b><span id="wrong-msg" className="label label-danger font12">{invalidAccess}</span></b>
-          </p>
+    <div className="login-box">
+      <div className="login-logo"><b>Sistema</b> Clicksul</div>
+
+      <div className="card">
+        <div className="card-body login-card-body">
+          <p className="login-box-msg">Faça o login para iniciar sua sessão</p>
+          <div
+            className={`alert alert-info text-center py-2 login-alert ${invalidAccess ? 'login-alert--visible' : ''}`}
+            role="alert"
+          >
+            {invalidAccess}
+          </div>
 
           <form onSubmit={handleSubmit}>
-            <div className="form-group has-feedback has-error">
+            <div className={`input-group ${wronguser ? 'mb-1' : 'mb-3'}`}>
               <input
                 type="text"
-                className="form-control"
+                className={`form-control ${wronguser ? 'is-invalid' : ''}`}
                 placeholder="E-mail"
                 name="email"
                 onChange={handleChange}
               />
-              <span className="glyphicon glyphicon-user form-control-feedback"></span>
-              <span id="wrong-user" className="help-block">{wronguser}</span>
+              <div className="input-group-append">
+                <div className="input-group-text">
+                  <FaUser className="text-muted" />
+                </div>
+              </div>
             </div>
-            <div className="form-group has-feedback has-error">
+            {wronguser && <div className="invalid-feedback d-block mt-0 mb-2">{wronguser}</div>}
+
+            <div className={`input-group ${wrongpass ? 'mb-1' : 'mb-3'}`}>
               <input
                 type="password"
                 id="password"
-                className="form-control"
-                placeholder="Password"
+                className={`form-control ${wrongpass ? 'is-invalid' : ''}`}
+                placeholder="Senha"
                 name="password"
                 onChange={handleChange}
               />
-              <span className="glyphicon glyphicon-lock form-control-feedback"></span>
-              <span id="wrong-pass" className="help-block">{wrongpass}</span>
-            </div>
-            <div className="row">
-              <div className="col-xs-8">
-                <div className="checkbox icheck">
-                  <label><Link to="/forgot">Esqueci minha senha</Link></label>
+              <div className="input-group-append">
+                <div className="input-group-text">
+                  <FaLock className="text-muted" />
                 </div>
               </div>
-              <div className="col-xs-4">
-                <button className="btn btn-primary btn-block btn-flat" type="submit" disabled={loading}>
-                  {loading ? "Carregando..." : "Sign In"}
+            </div>
+            {wrongpass && <div className="invalid-feedback d-block mt-0 mb-2">{wrongpass}</div>}
+
+            <div className="row align-items-center">
+              <div className="col-8">
+                <p className="mb-0"><Link className="text-primary" to="/forgot">Esqueci minha senha</Link></p>
+              </div>
+              <div className="col-4">
+                <button className="btn btn-primary btn-block" type="submit" disabled={loading}>
+                  {loading ? "Carregando..." : "Entrar"}
                 </button>
               </div>
             </div>

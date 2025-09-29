@@ -26,15 +26,15 @@ const BillingModule = () => {
     <>
       <div className="row">
         <div className="col-md-12">
-          <div className="box box-warning">
-            <div className="box-header with-border">
-              <a href="#" id="divLevy"><h3 className="box-title text-black">Módulo de Cobranças</h3></a>
+          <div className="card card-warning">
+            <div className="card-header">
+              <a href="#" id="divLevy"><h3 className="card-title text-black">Módulo de Cobranças</h3></a>
 
-              <div className="box-tools pull-right">
-                <button type="button" id="buttonLevy" className="btn btn-box-tool" data-widget="collapse"><i className="fa fa-minus"></i></button>
+              <div className="card-tools">
+                <button type="button" id="buttonLevy" className="btn btn-tool" data-card-widget="collapse"><i className="fas fa-minus"></i></button>
               </div>
             </div>
-            <div className="box-body no-padding">
+            <div className="card-body p-0">
               <table className="table table-striped">
                 <thead>
                   <tr>
@@ -62,7 +62,7 @@ const BillingModule = () => {
                       <td className="text-right">{res.dbvalue}</td>
                       <td>
                         <a href="#" onClick={ () => handleModal(res) }>
-                          <span className="badge bg-yellow">IR</span>
+                          <span className="badge badge-warning">IR</span>
                         </a>
                       </td>
                     </tr>

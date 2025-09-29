@@ -13,7 +13,7 @@ const DashboardAlerts = () => {
   return (
     <div className="row">
       {[ 'vcr', 'vcratr', 'vcp', 'vcpatr' ].map(key => (
-        <div className="col-lg-3 col-xs-6" key={key}>
+        <div className="col-6 col-lg-3" key={key}>
           <div className={`small-box bg-${key === 'vcr' ? 'aqua' : key === 'vcratr' ? 'red' : key === 'vcp' ? 'green' : 'yellow'}`}>
             <div className="inner"> 
               <h3>{displayValue(key)}</h3>

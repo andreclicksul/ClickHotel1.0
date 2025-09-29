@@ -178,10 +178,10 @@ const ClientsCreate = () => {
         <form role="form" onSubmit={handleSubmit} noValidate>
           <div className="row">
             <div className="col-md-12">
-              <div className="box box-primary">
-                <div className="box-header">
-                  <h3 className="box-title"><span className="fontTitle">Novo Cliente</span></h3>
-                  <div className="box-tools pull-right">
+              <div className="card card-primary">
+                <div className="card-header">
+                  <h3 className="card-title"><span className="fontTitle">Novo Cliente</span></h3>
+                  <div className="card-tools">
                     <div id="msgerro">{wrong}</div>
                     <div id="buttons">
                       <button type="submit" className={`btn btn-success ${secinsert}`}>
@@ -189,7 +189,7 @@ const ClientsCreate = () => {
                       </button>
                       &nbsp;
                       <Link to="/clients">
-                        <span className="btn btn-default">
+                        <span className="btn btn-outline-secondary">
                           <i className="fa fa-arrow-left"></i>&nbsp;&nbsp;&nbsp;Retornar
                         </span>
                       </Link>
@@ -197,7 +197,7 @@ const ClientsCreate = () => {
                   </div>
                 </div>
 
-                <div className="box-body">
+                <div className="card-body">
                   <div className="row">
                   
                     <div className="form-group col-md-4 col-sm-6">
@@ -364,11 +364,11 @@ const ClientsCreate = () => {
 
           <div className="row">
             <div className="col-md-12">
-              <div className="box box-danger">
-                <div className="box-header with-border">
-                  <h3 className="box-title text-black">Endereço</h3>
+              <div className="card card-danger">
+                <div className="card-header with-border">
+                  <h3 className="card-title text-black">Endereço</h3>
                 </div>
-                <div className="box-body">
+                <div className="card-body">
                   <div className="col-md-12">
 
                     <div className="row">
