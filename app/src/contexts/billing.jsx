@@ -10,7 +10,7 @@ export const BillingProvider = ({ children }) => {
 
   const [ databillings, setDatabillings ] = useState([])  
 
-  const [ datadash, setDatadash ] = useState([])
+  const [ datadash, setDatadash ] = useState({})
 
   const readBilling = async () => {
 
@@ -39,7 +39,7 @@ export const BillingProvider = ({ children }) => {
 
       setDatadash(response.dash)
       */
-      const response = []
+      const response = {}
       setDatadash(response)
 
     //} catch (e) {
@@ -52,9 +52,8 @@ export const BillingProvider = ({ children }) => {
     <BillingContext.Provider value={
       { 
         databillings, 
-        datadash, 
-        //dataclients: datadash.clients, 
-        dataclients: datadash, 
+        datadash,
+        dataclients: Array.isArray(datadash?.clients) ? datadash.clients : [],
         updateBillings: setDatabillings, 
         readBilling, 
         readDash

@@ -11,17 +11,13 @@ const apiCep = axios.create({
   baseURL: 'https://viacep.com.br/ws/'
 })
 
-/*
-api.interceptors.request.use(async config => {
-    const user = getUserLocalStorage('u')
-    if (user) {
-      const token = `Bearer ${user.token}`
-      config.headers.Authorization = token
-    }
-    return config
+api.interceptors.request.use((config) => {
+  const session = getUserLocalStorage('u')
+  if (session?.token) {
+    config.headers.Authorization = `Bearer ${session.token}`
   }
-)
-*/
+  return config
+})
 
 export const post = async (url, Data) => {
   const request = await api.post(url, Data)

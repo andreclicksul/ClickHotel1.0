@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { getUserLocalStorage, setUserLocalStorage } from "../services/api"
 import { AuthContext } from "./context"
 import { post } from "../services/api"
@@ -9,15 +9,30 @@ export const AuthProvider = ({ children }) => {
   const [forgotsend, setForgotsend] = useState(false)
 
   const authenticate = async (email, data) => {
+    setLoading(true)
     try {
       const response = await post("/authenticate", data)
 
       console.log(response)
 
       if (response.status === 200) {
-        const payload = { ...response, email }
+        const decodeJwt = (token) => {
+          const base64Url = token.split('.')[1]
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/')
+          const jsonPayload = decodeURIComponent(
+            window
+              .atob(base64)
+              .split('')
+              .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+              .join(''),
+          )
+          return JSON.parse(jsonPayload)
+        }
+
+        const payloadDecoded = decodeJwt(response.token)
+        const payload = { ...response, email, permissions: payloadDecoded }
         setUser(payload)
-        setUserLocalStorage("u", payload)
+        setUserLocalStorage('u', payload)
         return true
       }
 
@@ -27,13 +42,20 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       logout()
       return false
+    } finally {
+      setLoading(false)
     }
   }
 
   const logout = () => {
     setUser(null)
     localStorage.removeItem("u")
+    setLoading(false)
   }
+
+  useEffect(() => {
+    setLoading(false)
+  }, [])
 
   return (
     <AuthContext.Provider value={{ 

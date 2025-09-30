@@ -2,13 +2,17 @@ import { useContext, useEffect, useState } from "react"
 import { MainContext, BillingContext } from "../../contexts/context"
 
 const DashboardAlerts = () => {
-  const { datadash, readDash } = useContext(BillingContext)
+  const { datadash = {}, readDash } = useContext(BillingContext)
 
   const { permissions } = useContext(MainContext)
 
-  const displayValue = key => permissions[key] >= 1 ? datadash[key] : '---'
+  const displayValue = (key) => (permissions?.[key] >= 1 ? datadash?.[key] ?? 0 : '---')
 
-  useEffect(readDash, [readDash])
+  useEffect(() => {
+    if (typeof readDash === "function") {
+      readDash()
+    }
+  }, [readDash])
 
   return (
     <div className="row">

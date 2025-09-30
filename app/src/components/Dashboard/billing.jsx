@@ -4,9 +4,9 @@ import ModalBilling from "./modalbilling"
 
 const BillingModule = () => {
 
-  const { databillings, readBilling } = useContext(BillingContext)
+  const { databillings = [], readBilling } = useContext(BillingContext)
 
-  const [ dataform, setDataform ] = useState('')
+  const [ dataform, setDataform ] = useState(null)
 
   const [ readOnly, setReadonly ] = useState(false)
   
@@ -15,12 +15,12 @@ const BillingModule = () => {
     $("#modalBilling").modal() 
   }
 
-  useEffect( () => { 
-    if (!readOnly) {
+  useEffect(() => {
+    if (!readOnly && typeof readBilling === "function") {
       readBilling()
       setReadonly(true)
     }
-  })
+  }, [readOnly, readBilling])
 
   return ( 
     <>
@@ -76,7 +76,7 @@ const BillingModule = () => {
 
       <div className="modal fade" id="modalBilling" tabIndex="-1" role="dialog">
         <div className="modal-dialog" role="document">
-          {dataform != '' && <ModalBilling dataform={dataform}/>}
+          {dataform && <ModalBilling dataform={dataform}/>}
         </div>
       </div>
     </>

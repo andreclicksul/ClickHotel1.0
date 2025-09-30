@@ -11,7 +11,7 @@ const Forgot = () => {
 
   const fullYear = new Date().getFullYear();
 
-  const classbuttonText = 'glyphicon glyphicon-arrow-right text-muted'
+  const classbuttonText = 'fas fa-arrow-right text-white'
 
   const [wronguser, setWronguser] = useState('')
 
@@ -49,7 +49,7 @@ const Forgot = () => {
 
     if (data.email == '') return 
 
-    setClassbutton('fa fa-refresh fa-spin')
+    setClassbutton('fas fa-sync-alt fa-spin text-white')
 
     try {
       const response = await post('login.php', userData)
@@ -72,9 +72,16 @@ const Forgot = () => {
         <div className="lockscreen-wrapper">
           <div className="login-logo">
             <b>Sistema Clicksul</b>
-            <p><b><span id="wrong-msg" className="label label-danger font12">{wronguser}</span></b></p>
           </div>
-          <div className="lockscreen-item">
+
+          <div
+            className={`alert alert-danger text-center py-2 login-alert ${wronguser ? 'login-alert--visible' : ''}`}
+            role="alert"
+          >
+            {wronguser}
+          </div>
+
+          <div className="lockscreen-item mt-3">
             <form onSubmit={handleSubmit}>
               <div className="input-group">
                 <input 
@@ -85,18 +92,18 @@ const Forgot = () => {
                   name="email"
                   onChange={handleChange}
                 />
-                <div className="input-group-btn">
-                  <button type="submit" className="btn">
+                <div className="input-group-append">
+                  <button type="submit" className="btn btn-primary">
                     <i className={classbutton}></i>
                   </button>
                 </div>
               </div>
             </form>
           </div>
-          <div className="help-block text-center">
+          <div className="help-block text-center mt-3">
             <span>Digite seu e-mail e receba as instruções para redefinir a sua senha.</span>
           </div>
-          <div className="text-center">
+          <div className="text-center mt-2">
             <Link to="/">Ou entre com um usuário diferente</Link>
           </div>
           <div className="lockscreen-footer text-center">

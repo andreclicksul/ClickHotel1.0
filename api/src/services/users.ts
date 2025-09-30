@@ -19,7 +19,7 @@ export const loginRouterHandler = async (
   try {
     const { email, password } = authenticateSchema.parse(request.body)
 
-    const registerUser = await prisma.tb_users.findMany({
+    const registerUser = await prisma.tb_users.findFirst({
       where: {
         email,
         deleted: false,
@@ -28,20 +28,19 @@ export const loginRouterHandler = async (
       include: {
         tb_audits: {
           take: 2,
-          orderBy: {
-            id: 'desc',
-          },
+          orderBy: { dtregister: 'desc' },
           select: {
             ipaccess: true,
             dtregister: true,
           },
         },
       },
+      relationLoadStrategy: 'query',
     })
 
-    if (registerUser.length === 0) throw new Error('erro1')
+    if (!registerUser) throw new Error('erro1')
 
-    const objectUser = registerUser[0]
+    const objectUser = registerUser
 
     const { user, isPermission, passwordHash } =
       await findUserAuthentication(objectUser)
@@ -89,12 +88,13 @@ export const readPermissionUserIdHandler = async (
   try {
     const authorization = request.raw.headers.authorization
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const token: string = authorization.split(' ')[1]
+    if (!authorization) throw new Error('missing authorization header')
+
+    const token = authorization.split(' ')[1]
+    const decoded = app.jwt.decode(token) as Record<string, any>
 
     const { starthour, startminute, finishhour, finishminute } =
-      readPermissionSchema.parse(app.jwt.decode(token))
+      readPermissionSchema.parse(decoded)
 
     const diftime: boolean = difTime(
       starthour,
@@ -103,11 +103,42 @@ export const readPermissionUserIdHandler = async (
       finishminute,
     )
 
-    if (diftime) throw new Error()
+    if (diftime) throw new Error('time restriction')
 
-    // reply.code(200).send({ status: 200, iduser: id, user })
+    const now = new Date()
+    const formatTime = (value?: string) =>
+      value && value.length === 2 ? value : (`0${value ?? '0'}`).slice(-2)
+
+    reply.code(200).send({
+      status: 200,
+      iduser: decoded.id,
+      desuser: decoded.user ?? '',
+      desname: decoded.name ?? '',
+      desphone: decoded.phone ?? '',
+      descor: decoded.color ?? '',
+      avatar: decoded.avatar ?? 0,
+      yearnow: now.getFullYear(),
+      timenow: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
+      dateprevious: '',
+      desip: request.ip ?? '',
+      msgFooter: '',
+      countAvatar: decoded.avatar ?? 0,
+      startTime: `${formatTime(decoded.starthour)}:${formatTime(decoded.startminute)}`,
+      finishTime: `${formatTime(decoded.finishhour)}:${formatTime(decoded.finishminute)}`,
+      checklist: decoded.checklist ?? 0,
+      produto: decoded.product ?? 0,
+      occupationmap: decoded.occupationmap ?? 0,
+      cliente: decoded.client ?? 0,
+      cadusuario: decoded.caduser ?? 0,
+      financeiro: decoded.financial ?? 0,
+      billing: decoded.checklist ?? 0,
+      cp: decoded.accountpay ?? 0,
+      cr: decoded.accountreceive ?? 0,
+      fornecedor: decoded.provider ?? 0,
+      auditoria: decoded.audit ?? 0,
+    })
   } catch (error) {
-    reply.code(401).send({ msg: 'Sessão encerrada' })
+    reply.code(401).send({ msg: 'Sessão encerrada', error: `${error}` })
   }
 }
 

@@ -1,7 +1,7 @@
 import { useEffect, useState, useContext } from "react"
 import { useNavigate } from "react-router-dom"
 import { MainContext, AuthContext } from "./context"
-import { post } from "../services/api"
+import { get } from "../services/api"
 
 export const MainProvider = ({ children }) => {
 
@@ -45,7 +45,7 @@ export const MainProvider = ({ children }) => {
   const readPermissionUser = async () => {
 
     try {
-      const response = await get(`/readpermissionuser${user.iduser}`)
+      const response = await get(`/readpermissionuser/${user.iduser}`)
  
       if (response.status != 200) {
         logout()
@@ -75,11 +75,11 @@ export const MainProvider = ({ children }) => {
         cliente: response.cliente,
         cadusuario: response.cadusuario,
         financeiro: response.financeiro,
-        billing: response.billing,
-        cp: response.cp,
-        cr: response.cr,
-        fornecedor: response.fornecedor,
-        auditoria: response.auditoria
+        billing: response.billing ?? response.checklist ?? 0,
+        cp: response.cp ?? 0,
+        cr: response.cr ?? 0,
+        fornecedor: response.fornecedor ?? 0,
+        auditoria: response.auditoria ?? 0
       })
       
      } catch (e) {
@@ -89,11 +89,15 @@ export const MainProvider = ({ children }) => {
     }      
   }
   
-  if (data.iduser == 0) readPermissionUser() 
+  useEffect(() => {
+    if (user && !data.iduser) {
+      readPermissionUser()
+    }
+  }, [user, data.iduser])
 
-  useEffect( () => {
+  useEffect(() => {
     setSrcAvatar(`/res/admin/avatar/avatar${data.avatar}.png`)
-  },[])  
+  }, [data.avatar])
 
   return (
     <MainContext.Provider value={{ srcAvatar, data, permissions, logout: handleLogout }}>

@@ -5,11 +5,13 @@ import {
   readUsersHandler,  
   readUserIdHandler, 
   createUserHandler,
+  readPermissionUserIdHandler,
 } from '../services/users'
 
 export async function userRoutes(app: FastifyInstance) {
   // read users
-  app.get('/abc', async (request: FastifyRequest, reply: FastifyReply) => reply.code(200).send({status: 200, iduser: 2, token: 'OKOK'}))
+  app.get('/readpermissionuser/:id', async (request: FastifyRequest, reply: FastifyReply) =>
+    await readPermissionUserIdHandler(request, reply))
 
   app.get('/readusers', async (request: FastifyRequest, reply: FastifyReply) => 
     await readUsersHandler(request, reply))
