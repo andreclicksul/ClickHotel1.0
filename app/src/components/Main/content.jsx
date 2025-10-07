@@ -7,34 +7,33 @@ import RecentClients from "../Dashboard/recentclients"
 import GraphicsDashboad from "../Dashboard/graphics"
 
 const Content = () => {
+  const { permissions = {} } = useContext(MainContext)
+  const billingEnabled = (permissions.billing ?? 0) >= 3
+  const financeEnabled = (permissions.financeiro ?? 0) >= 4
 
-  const { innerHeight: height } = window
-  const { permissions } = useContext(MainContext)
-  const billing = permissions.billing >= 3
-  const financeiro = permissions.financeiro >= 4
+  const browserHeight = typeof window !== 'undefined' ? window.innerHeight : 768
+  const contentMinHeight = `${browserHeight - 142}px`
 
   return (
-    <>
+    <section className="content-wrapper">
       <section className="content-header">
         <h1>Dashboard</h1>
       </section>
 
-      <section className="content" style={{minHeight: `${height-142}px`}}>
-        <span id="typeForm" className="ls-display-none">dashboard</span>
-        <section className="content">
-          <BillingProvider>
-            <DashboardAlerts />
-            { billing && <BillingModule /> }
-            <div className="row">
-              { financeiro && <GraphicsDashboad /> }
-              <RecentClients />
-            </div>
-          </BillingProvider>
-        </section>
-      </section>
-    </>
-  )
+      <section className="content" style={{ minHeight: contentMinHeight }}>
+        <BillingProvider>
+          <DashboardAlerts />
 
+          {billingEnabled && <BillingModule />}
+
+          <div className="row">
+            {financeEnabled && <GraphicsDashboad />}
+            <RecentClients />
+          </div>
+        </BillingProvider>
+      </section>
+    </section>
+  )
 }
 
 export default Content

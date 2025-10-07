@@ -22,202 +22,177 @@ const formatDate = (date) => {
   return `${day}/${month}/${year}`
 }
 
-const ModalBilling = ({dataform}) => {
-
+const ModalBilling = ({ dataform }) => {
   const { logout } = useContext(MainContext)
-
-  const { user } = useContext(AuthContext)  
-
+  const { user } = useContext(AuthContext)
   const { updateBillings } = useContext(BillingContext)
 
-  const [dueDate, setDueDate] = useState(() => parseDate(dataform.dtscheduling))
-
+  const [dueDate, setDueDate] = useState(() => parseDate(dataform?.dtscheduling))
   const [data, setData] = useState({
     op: 2,
-    id: dataform.id,
-    desuser: user.desuser,
-    desstatus: dataform.desstatus,
-    desresult: dataform.desresult,
-    dtscheduling: dataform.dtscheduling || ''
+    id: dataform?.id,
+    desuser: user?.desuser ?? '',
+    desstatus: dataform?.desstatus ?? '',
+    desresult: dataform?.desresult ?? '',
+    dtscheduling: dataform?.dtscheduling ?? '',
   })
 
-  const handleChange = (e) => {
-    const value = e.target.value
-    setData({
-      ...data,
-      [e.target.name]: value
-    })
+  const handleChange = (event) => {
+    const { name, value } = event.target
+    setData((current) => ({
+      ...current,
+      [name]: value,
+    }))
   }
 
   const handleDateChange = (date) => {
     setDueDate(date)
-    setData((current) => ({
-      ...current,
-      dtscheduling: formatDate(date)
-    }))
+    setData((current) => ({ ...current, dtscheduling: formatDate(date) }))
   }
 
-  const handleSubmit = async (e) => {
-    
-    e.preventDefault()
+  const handleSubmit = async (event) => {
+    event.preventDefault()
 
     try {
-
-      //const response = await post('dashboard.php', data)
-      //updateBillings(response.billing)
+      // const response = await post('dashboard.php', data)
+      // updateBillings(response.billing)
       updateBillings([])
-
-    } catch (e) {
-      logout(302)
-      return
+    } catch (error) {
+      logout?.(302)
     }
   }
 
   return (
     <div className="modal-content">
       <div className="modal-header">
+        <h5 className="modal-title">Mudança de Status e Conclusão</h5>
         <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-        <span aria-hidden="true">×</span></button>
-        <h4 className="modal-title">Mudança de Status e Conclusão</h4>
+          <span aria-hidden="true">×</span>
+        </button>
       </div>
 
-      <form className="form-horizontal" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
         <div className="modal-body">
-          <div className="card-body">
-            <div className="form-group">
-              <label htmlFor="dtscheduling" className="col-sm-2 control-label">Vencimento</label>
-              <div className="col-sm-3">
-                <ReactDatePicker
-                  selected={dueDate}
-                  onChange={handleDateChange}
-                  locale={ptBR}
-                  dateFormat="dd/MM/yyyy"
-                  className="form-control text-center"
-                  name="dtscheduling"
-                  placeholderText="Selecione a data"
-                  showPopperArrow={false}
-                  calendarStartDay={1}
-                />
-              </div>
-              <label htmlFor="dbvalue" className="col-sm-1 control-label">Valor</label>
-              <div className="col-sm-3">
-                <input 
-                  type="text" 
-                  name="dbvalue" 
-                  className="form-control text-right disabled"
-                  readOnly
-                  value={dataform.dbvalue || ''}
-                />
-              </div>
-              <label htmlFor="parcel" className="col-sm-1 control-label">Parcela</label>
-              <div className="col-sm-2">
-                <input 
-                  type="text" 
-                  name="parcel" 
-                  className="form-control text-center disabled"
-                  readOnly
-                  value={dataform.parcel || ''}
-                />
-              </div>
+          <div className="form-row">
+            <div className="form-group col-md-4">
+              <label htmlFor="dtscheduling">Vencimento</label>
+              <ReactDatePicker
+                selected={dueDate}
+                onChange={handleDateChange}
+                locale={ptBR}
+                dateFormat="dd/MM/yyyy"
+                className="form-control text-center"
+                name="dtscheduling"
+                placeholderText="Selecione a data"
+                showPopperArrow={false}
+                calendarStartDay={1}
+              />
             </div>
-
-            <div className="form-group">
-              <label htmlFor="desname" className="col-sm-2 control-label">Cliente</label>
-              <div className="col-sm-10">
-                <input 
-                  type="text" 
-                  name="desname" 
-                  className="form-control disabled text-uppercase"
-                  readOnly                  
-                  value={dataform.desname || ''}
-                />
-              </div>
+            <div className="form-group col-md-4">
+              <label htmlFor="dbvalue">Valor</label>
+              <input
+                type="text"
+                name="dbvalue"
+                className="form-control text-right"
+                readOnly
+                value={dataform?.dbvalue ?? ''}
+              />
             </div>
-
-            <div className="form-group">
-              <label htmlFor="desdescription" className="col-sm-2 control-label">Descrição</label>
-              <div className="col-sm-10">
-                <input 
-                  type="text" 
-                  name="desdescription" 
-                  className="form-control disabled text-uppercase"
-                  readOnly                  
-                  value={dataform.desdescription || ''}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="desresponsavel" className="col-sm-2 control-label">Responsável</label>
-              <div className="col-sm-10">
-                <input 
-                  type="text" 
-                  name="desresponsavel" 
-                  className="form-control disabled text-uppercase"
-                  readOnly                  
-                  value={dataform.desresponsavel || ''}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="desemail" className="col-sm-2 control-label">E-mail</label>
-              <div className="col-sm-10">
-                <input 
-                  type="text" 
-                  name="desemail" 
-                  className="form-control disabled"
-                  readOnly                  
-                  value={dataform.desemail || ''}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="descel" className="col-sm-2 control-label">Celular</label>
-              <div className="col-sm-4">
-                <input 
-                  type="text" 
-                  name="descel" 
-                  className="form-control disabled text-center"
-                  readOnly                  
-                  value={dataform.descel || ''}
-                />
-              </div>
-            </div>              
-
-            <div className="form-group">
-              <label htmlFor="desstatus" className="col-sm-2 control-label">Status</label>
-              <div className="col-sm-10">
-                <input 
-                  type="text" 
-                  name="desstatus" 
-                  className="form-control text-uppercase" 
-                  maxLength={80}
-                  value={data.desstatus}
-                  onChange={handleChange}
-                />
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="desresult" className="col-sm-2 control-label">Conclusão</label>
-              <div className="col-sm-10">
-                <input 
-                  type="text" 
-                  name="desresult" 
-                  className="form-control text-uppercase" 
-                  maxLength={80}
-                  value={data.desresult}
-                  onChange={handleChange}
-                />
-              </div>
+            <div className="form-group col-md-4">
+              <label htmlFor="parcel">Parcela</label>
+              <input
+                type="text"
+                name="parcel"
+                className="form-control text-center"
+                readOnly
+                value={dataform?.parcel ?? ''}
+              />
             </div>
           </div>
+
+          <div className="form-group">
+            <label htmlFor="desname">Cliente</label>
+            <input
+              type="text"
+              name="desname"
+              className="form-control text-uppercase"
+              readOnly
+              value={dataform?.desname ?? ''}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="desdescription">Descrição</label>
+            <input
+              type="text"
+              name="desdescription"
+              className="form-control text-uppercase"
+              readOnly
+              value={dataform?.desdescription ?? ''}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="desresponsavel">Responsável</label>
+            <input
+              type="text"
+              name="desresponsavel"
+              className="form-control text-uppercase"
+              readOnly
+              value={dataform?.desresponsavel ?? ''}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="desemail">E-mail</label>
+            <input
+              type="text"
+              name="desemail"
+              className="form-control"
+              readOnly
+              value={dataform?.desemail ?? ''}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="descel">Celular</label>
+            <input
+              type="text"
+              name="descel"
+              className="form-control text-center"
+              readOnly
+              value={dataform?.descel ?? ''}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="desstatus">Status</label>
+            <input
+              type="text"
+              name="desstatus"
+              className="form-control text-uppercase"
+              maxLength={80}
+              value={data.desstatus}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="desresult">Conclusão</label>
+            <input
+              type="text"
+              name="desresult"
+              className="form-control text-uppercase"
+              maxLength={80}
+              value={data.desresult}
+              onChange={handleChange}
+            />
+          </div>
         </div>
-        <div className="modal-footer">
-          <button type="button" id="closeModal" className="btn btn-outline-secondary pull-left" data-dismiss="modal">Fechar</button>
-          <button className="btn btn-primary" type="submit">Atualizar</button>
+
+        <div className="modal-footer justify-content-between">
+          <button type="button" className="btn btn-secondary" data-dismiss="modal">Fechar</button>
+          <button type="submit" className="btn btn-primary">Atualizar</button>
         </div>
       </form>
     </div>

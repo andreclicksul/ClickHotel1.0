@@ -3,67 +3,71 @@ import { BillingContext } from "../../contexts/context"
 import ModalBilling from "./modalbilling"
 
 const BillingModule = () => {
-
   const { databillings = [], readBilling } = useContext(BillingContext)
 
-  const [ dataform, setDataform ] = useState(null)
+  const [dataform, setDataform] = useState(null)
+  const [initialized, setInitialized] = useState(false)
 
-  const [ readOnly, setReadonly ] = useState(false)
-  
-  const handleModal = res => {
-    setDataform(res)
-    $("#modalBilling").modal() 
+  const handleModal = (record) => {
+    setDataform(record)
+    window.$('#modalBilling').modal('show')
   }
 
   useEffect(() => {
-    if (!readOnly && typeof readBilling === "function") {
+    if (!initialized && typeof readBilling === 'function') {
       readBilling()
-      setReadonly(true)
+      setInitialized(true)
     }
-  }, [readOnly, readBilling])
+  }, [initialized, readBilling])
 
-  return ( 
-    <>
-      <div className="row">
-        <div className="col-md-12">
-          <div className="card card-warning">
-            <div className="card-header">
-              <a href="#" id="divLevy"><h3 className="card-title text-black">Módulo de Cobranças</h3></a>
-
-              <div className="card-tools">
-                <button type="button" id="buttonLevy" className="btn btn-tool" data-card-widget="collapse"><i className="fas fa-minus"></i></button>
-              </div>
+  return (
+    <div className="row">
+      <div className="col-12">
+        <div className="card card-warning">
+          <div className="card-header">
+            <h3 className="card-title text-black">Módulo de Cobranças</h3>
+            <div className="card-tools">
+              <button type="button" className="btn btn-tool" data-card-widget="collapse">
+                <i className="fas fa-minus"></i>
+              </button>
             </div>
-            <div className="card-body p-0">
-              <table className="table table-striped">
-                <thead>
+          </div>
+
+          <div className="card-body p-0">
+            <div className="table-responsive">
+              <table className="table table-hover mb-0">
+                <thead className="bg-warning">
                   <tr>
-                    <th className="width10px">Vencimento</th>
+                    <th>Vencimento</th>
                     <th>Cliente</th>
                     <th>Descrição</th>
                     <th>Status</th>
                     <th>Conclusão</th>
-                    <th className="width10px">Usuário</th>
-                    <th className="width10px">Parcela</th>
-                    <th className="text-right width10px">Valor</th>
-                    <th className="width10px">&nbsp;</th>
+                    <th>Usuário</th>
+                    <th className="text-center">Parcela</th>
+                    <th className="text-right">Valor</th>
+                    <th className="text-center">Ações</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {databillings.map(res => (
-                    <tr key={res.id}>
-                      <td>{res.dtscheduling}</td>
-                      <td className="text-uppercase">{res.desname}</td>
-                      <td className="text-uppercase">{res.desdescription}</td>
-                      <td className="text-uppercase">{res.desstatus}</td>
-                      <td className="text-uppercase">{res.desresult}</td>
-                      <td className="text-uppercase">{res.desuser}</td>
-                      <td className="text-center">{res.parcel}</td>
-                      <td className="text-right">{res.dbvalue}</td>
-                      <td>
-                        <a href="#" onClick={ () => handleModal(res) }>
-                          <span className="badge badge-warning">IR</span>
-                        </a>
+                  {databillings.map((record) => (
+                    <tr key={record.id}>
+                      <td>{record.dtscheduling}</td>
+                      <td className="text-uppercase">{record.desname}</td>
+                      <td className="text-uppercase">{record.desdescription}</td>
+                      <td className="text-uppercase">{record.desstatus}</td>
+                      <td className="text-uppercase">{record.desresult}</td>
+                      <td className="text-uppercase">{record.desuser}</td>
+                      <td className="text-center">{record.parcel}</td>
+                      <td className="text-right">{record.dbvalue}</td>
+                      <td className="text-center">
+                        <button
+                          type="button"
+                          className="btn btn-sm btn-outline-warning"
+                          onClick={() => handleModal(record)}
+                        >
+                          <i className="fas fa-edit"></i>
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -76,10 +80,10 @@ const BillingModule = () => {
 
       <div className="modal fade" id="modalBilling" tabIndex="-1" role="dialog">
         <div className="modal-dialog" role="document">
-          {dataform && <ModalBilling dataform={dataform}/>}
+          {dataform && <ModalBilling dataform={dataform} />}
         </div>
       </div>
-    </>
+    </div>
   )
 }
 

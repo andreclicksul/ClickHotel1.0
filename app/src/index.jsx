@@ -11,6 +11,7 @@ import 'select2/dist/css/select2.min.css'
 import 'react-datepicker/dist/react-datepicker.css'
 import 'admin-lte/dist/css/adminlte.min.css'
 import '/res/admin/css/general.css' // Caso este arquivo seja específico do projeto
+import './assets/styles/dashboard.css'
 
 // Importações de scripts
 import $ from './setup/jquery-global'

@@ -3,29 +3,51 @@ import { Link } from "react-router-dom"
 import { MainContext } from "../../contexts/context"
 
 const Header = () => {
+  const { logout, srcAvatar, data } = useContext(MainContext)
 
-  const { logout } = useContext(MainContext)
+  const avatarSrc = srcAvatar || '/res/admin/avatar/avatar1.png'
+  const userName = data?.desuser || 'Usuário'
+  const userEmail = data?.desemail || ''
 
-   return (
-    <header id="main-header" className="main-header">
-      <Link to="/home" className="logo"> 
-        <span className="logo-mini"><b>CLK</b></span>
-        <span className="logo-lg"><b>Clicksul</b></span>
-      </Link>
-      <nav className="navbar navbar-static-top" role="navigation">
-        <a href="#" className="sidebar-toggle" data-toggle="offcanvas" role="button">
-          <span className="sr-only">Toggle navigation</span>
-        </a>
-        <div className="navbar-custom-menu">
-          <ul className="nav navbar-nav">
-            <li>
-              <a href="#" onClick={logout}><i className="fa fa-gears"></i></a>
+  const handleLogout = (event) => {
+    event?.preventDefault()
+    logout?.()
+  }
+
+  return (
+    <nav className="main-header navbar navbar-expand navbar-white navbar-light">
+      <ul className="navbar-nav">
+        <li className="nav-item">
+          <a className="nav-link" data-widget="pushmenu" href="#" role="button">
+            <i className="fas fa-bars"></i>
+          </a>
+        </li>
+        <li className="nav-item d-none d-sm-inline-block">
+          <Link to="/home" className="nav-link">Início</Link>
+        </li>
+      </ul>
+
+      <ul className="navbar-nav ml-auto">
+        <li className="nav-item dropdown user-menu">
+          <a href="#" className="nav-link dropdown-toggle" data-toggle="dropdown">
+            <img src={avatarSrc} className="user-image img-circle elevation-2" alt="Avatar" />
+            <span className="d-none d-md-inline">{userName}</span>
+          </a>
+          <ul className="dropdown-menu dropdown-menu-lg dropdown-menu-right">
+            <li className="user-header bg-primary">
+              <img src={avatarSrc} className="img-circle elevation-2" alt="Avatar" />
+              <p>{userName}{userEmail && <small>{userEmail}</small>}</p>
+            </li>
+            <li className="user-footer">
+              <button type="button" className="btn btn-default btn-flat btn-sm float-right" onClick={handleLogout}>
+                <i className="fas fa-sign-out-alt mr-2"></i>Sair
+              </button>
             </li>
           </ul>
-        </div> 
-      </nav>      
-    </header>
-  ) 
+        </li>
+      </ul>
+    </nav>
+  )
 }
 
 export default Header

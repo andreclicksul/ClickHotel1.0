@@ -13,7 +13,7 @@ const jwtsecret = process.env.JWT_SECRET
 const authUrl: object = {
   '/readusers': true,
   '/readuser/:id': true,
-  '/createuser': true,
+  '/createuser': false,
   '/readpermissionuser/:id': true,
   '/authenticate': false,
 }

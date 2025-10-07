@@ -1,113 +1,83 @@
-import { useState, useEffect, useContext } from 'react'
-import { MainContext } from '../../contexts/context'
-import { get } from '../../services/api';
-import GraphicRechart from '../Graphics';
+import { useState, useEffect } from 'react'
+import GraphicRechart from '../Graphics'
 
-const DEFAULT_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
-const SAMPLE_REVENUE = [10, 20, 15, 16, 23, 54]
-const SAMPLE_EXPENSE = [3, 8, 25, 12, 13, 21]
+const MOCK_REVENUE = [
+  { mounth: 'Jan', Valor: 120 },
+  { mounth: 'Fev', Valor: 95 },
+  { mounth: 'Mar', Valor: 132 },
+  { mounth: 'Abr', Valor: 101 },
+  { mounth: 'Mai', Valor: 160 },
+  { mounth: 'Jun', Valor: 142 },
+  { mounth: 'Jul', Valor: 185 },
+  { mounth: 'Ago', Valor: 172 },
+  { mounth: 'Set', Valor: 155 },
+  { mounth: 'Out', Valor: 198 },
+  { mounth: 'Nov', Valor: 210 },
+  { mounth: 'Dez', Valor: 230 },
+]
 
-const ensureChartData = (entries = []) => {
-  return entries.map((entry, index) => {
-    if (entry == null) {
-      return {
-        mounth: DEFAULT_LABELS[index] ?? `Item ${index + 1}`,
-        Valor: 0,
-      }
-    }
-
-    if (typeof entry === 'number') {
-      return {
-        mounth: DEFAULT_LABELS[index] ?? `Item ${index + 1}`,
-        Valor: entry,
-      }
-    }
-
-    const label = entry.mounth ?? entry.textdtpayment ?? entry.label ?? DEFAULT_LABELS[index] ?? `Item ${index + 1}`
-    const value = Number(entry.Valor ?? entry.value ?? entry.valuepay ?? entry.total ?? entry.amount ?? 0)
-
-    return {
-      mounth: label,
-      Valor: Number.isFinite(value) ? value : 0,
-    }
-  })
-}
+const MOCK_EXPENSE = [
+  { mounth: 'Jan', Valor: 80 },
+  { mounth: 'Fev', Valor: 110 },
+  { mounth: 'Mar', Valor: 90 },
+  { mounth: 'Abr', Valor: 75 },
+  { mounth: 'Mai', Valor: 105 },
+  { mounth: 'Jun', Valor: 98 },
+  { mounth: 'Jul', Valor: 120 },
+  { mounth: 'Ago', Valor: 130 },
+  { mounth: 'Set', Valor: 115 },
+  { mounth: 'Out', Valor: 125 },
+  { mounth: 'Nov', Valor: 140 },
+  { mounth: 'Dez', Valor: 150 },
+]
 
 const GraphicsDashboad = () => {
+  const [initialized, setInitialized] = useState(false)
+  const [graphRevenue, setGraphRevenue] = useState(MOCK_REVENUE)
+  const [graphExpense, setGraphExpense] = useState(MOCK_EXPENSE)
 
-  const { logout } = useContext(MainContext)
-
-  const [ readonly, setReadonly ] = useState(false)
-
-  const [ graph1, setGraph1 ] = useState(() => ensureChartData(SAMPLE_REVENUE))
-
-  const [ graph2, setGraph2 ] = useState(() => ensureChartData(SAMPLE_EXPENSE))
-
-  const readGraph = async () => {
-
-    try {
-      const response = await get('dashboard.php?op=3')
-      const income = ensureChartData(response?.res1 ?? [])
-      const expenses = ensureChartData(response?.res2 ?? [])
-
-      setGraph1(income.length ? income : ensureChartData(SAMPLE_REVENUE))
-      setGraph2(expenses.length ? expenses : ensureChartData(SAMPLE_EXPENSE))
-
-    } catch (e) {
-      setGraph1(ensureChartData(SAMPLE_REVENUE))
-      setGraph2(ensureChartData(SAMPLE_EXPENSE))
-      logout('301')
+  useEffect(() => {
+    if (!initialized) {
+      setGraphRevenue(MOCK_REVENUE)
+      setGraphExpense(MOCK_EXPENSE)
+      setInitialized(true)
     }
-  }
-
-  useEffect( () => {
-    if (!readonly) {
-      readGraph()
-      setReadonly(true)
-    }
-  }, [])
+  }, [initialized])
 
   return (
-    <>
-      <div className="col-md-7">
-        <div className="card card-primary collapsed-card">
-          <div className="card-header">
-            <span id="opgraph1" className="ls-display-none">0</span>
-            <a href="#" id="divGraph1">
-              <h3 className="card-title text-black">Receita</h3>
-            </a>
-            <div className="card-tools">
-              <button type="button" className="btn btn-tool" data-card-widget="collapse">
-                <i id="typeButton1" className="fas fa-plus"></i>
-              </button>
-            </div>
-          </div>
-          <div className="card-body">
-            <div className="chart" id="chart1" style={{ height: '300px' }}>
-              <GraphicRechart data={graph1} barcolor={"#3c8dbc"} />
-            </div>
+    <div className="col-12 col-lg-7">
+      <div className="card card-primary">
+        <div className="card-header">
+          <h3 className="card-title text-black">Receita</h3>
+          <div className="card-tools">
+            <button type="button" className="btn btn-tool" data-card-widget="collapse">
+              <i className="fas fa-minus"></i>
+            </button>
           </div>
         </div>
-        <div className="card card-danger collapsed-card">
-          <div className="card-header">
-            <span id="opgraph2" className="ls-display-none">0</span>
-            <a href="#" id="divGraph2">
-              <h3 className="card-title text-black">Despesas</h3>
-            </a>
-            <div className="card-tools">
-              <button type="button" className="btn btn-tool" data-card-widget="collapse">
-                <i id="typeButton2" className="fas fa-plus"></i>
-              </button>
-            </div>
-          </div>
-          <div className="card-body">
-            <div className="chart" id="chart2" style={{ height: '300px' }}>
-              <GraphicRechart data={graph2} barcolor={"#dd4b39"} />
-            </div>
+        <div className="card-body">
+          <div style={{ height: 320 }}>
+            <GraphicRechart data={graphRevenue} barcolor="#3c8dbc" />
           </div>
         </div>
       </div>
-    </>
+
+      <div className="card card-danger">
+        <div className="card-header">
+          <h3 className="card-title text-black">Despesas</h3>
+          <div className="card-tools">
+            <button type="button" className="btn btn-tool" data-card-widget="collapse">
+              <i className="fas fa-minus"></i>
+            </button>
+          </div>
+        </div>
+        <div className="card-body">
+          <div style={{ height: 320 }}>
+            <GraphicRechart data={graphExpense} barcolor="#dd4b39" />
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

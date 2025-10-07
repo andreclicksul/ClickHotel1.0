@@ -1,0 +1,116 @@
+:root {
+  --main-header-height: 3.5rem;
+  --main-sidebar-width: 250px;
+  --warning-accent-bg: #f39c12;
+  --warning-accent-border: #d68910;
+  --warning-accent-contrast: #ffffff;
+}
+
+.wrapper .content-wrapper {
+  background-color: #f4f6f9;
+  min-height: 100vh;
+  padding: 0;
+  transition: margin-left 0.3s ease;
+}
+
+.layout-fixed .wrapper .content-wrapper {
+  margin-left: var(--main-sidebar-width, 250px);
+  margin-right: 0;
+}
+
+.content-header {
+  padding: 0.5rem 0 1rem 0;
+  margin-bottom: 1rem;
+}
+
+.content > .row {
+  margin: 0;
+}
+
+@media (max-width: 991.98px) {
+  .wrapper .content-wrapper {
+    padding: 0;
+  }
+
+  .layout-fixed .wrapper .content-wrapper {
+    margin-left: 0 !important;
+    margin-right: 0;
+  }
+
+  .wrapper .content-wrapper > .content,
+  .wrapper .content-wrapper > .content-header {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (min-width: 992px) {
+  .wrapper .content-wrapper > .content-header {
+    padding-left: 0;
+    padding-right: 0.5rem;
+    margin-left: -230px;
+  }
+
+  .wrapper .content-wrapper > .content {
+    padding-left: 0;
+    padding-right: 0.5rem;
+    margin-left: -230px;
+  }
+
+  .sidebar-collapse .wrapper .content-wrapper > .content-header,
+  .sidebar-collapse .wrapper .content-wrapper > .content {
+    margin-left: -65px;
+  }
+}
+
+.bg-warning,
+.badge-warning,
+.alert-warning,
+.card-warning:not(.card-outline),
+.card-warning:not(.card-outline) > .card-header {
+  background-color: var(--warning-accent-bg) !important;
+  border-color: var(--warning-accent-border) !important;
+  color: var(--warning-accent-contrast) !important;
+}
+
+.card-warning {
+  border-color: var(--warning-accent-border) !important;
+}
+
+.card-warning .card-title,
+.card-warning .card-tools .btn-tool {
+  color: var(--warning-accent-contrast) !important;
+}
+
+.table .bg-warning,
+.table thead.bg-warning th {
+  background-color: var(--warning-accent-bg) !important;
+  color: var(--warning-accent-contrast) !important;
+  border-color: var(--warning-accent-border) !important;
+}
+
+.small-box.bg-warning {
+  background-color: var(--warning-accent-bg) !important;
+  color: var(--warning-accent-contrast) !important;
+}
+
+.small-box.bg-warning .inner h3,
+.small-box.bg-warning .inner p {
+  color: var(--warning-accent-contrast) !important;
+}
+
+.small-box.bg-warning .icon > i {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.btn-outline-warning {
+  color: var(--warning-accent-bg);
+  border-color: var(--warning-accent-bg);
+}
+
+.btn-outline-warning:hover,
+.btn-outline-warning:focus {
+  background-color: var(--warning-accent-bg);
+  border-color: var(--warning-accent-bg);
+  color: var(--warning-accent-contrast);
+}
