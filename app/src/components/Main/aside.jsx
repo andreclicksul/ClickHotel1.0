@@ -1,9 +1,28 @@
-import { useContext } from "react"
-import { Link } from "react-router-dom"
+import { useContext, useEffect, useState } from "react"
+import { Link, useLocation } from "react-router-dom"
 import { MainContext } from "../../contexts/context"
 
 const Aside = () => {
   const { data = {}, permissions = {} } = useContext(MainContext)
+  const location = useLocation()
+  const cadastroRoutes = ['/clients', '/providers', '/users']
+  const isCadastroRouteActive = cadastroRoutes.some(route => location.pathname.startsWith(route))
+  const [isCadastroOpen, setIsCadastroOpen] = useState(() => isCadastroRouteActive)
+
+  useEffect(() => {
+    if (isCadastroRouteActive) {
+      setIsCadastroOpen(true)
+    }
+  }, [isCadastroRouteActive])
+
+  const handleCadastroToggle = (event) => {
+    event.preventDefault()
+    setIsCadastroOpen((prev) => !prev)
+  }
+
+  const isClientsActive = location.pathname.startsWith('/clients')
+  const isProvidersActive = location.pathname.startsWith('/providers')
+  const isUsersActive = location.pathname.startsWith('/users')
 
   const avatarSrc = data.srcAvatar || '/res/admin/avatar/avatar1.png'
   const userName = data.desuser || 'Usuário'
@@ -19,8 +38,8 @@ const Aside = () => {
           <ul className="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <li className="nav-header">MENU DE NAVEGAÇÃO</li>
 
-            <li className="nav-item has-treeview menu-open">
-              <a href="#" className="nav-link">
+            <li className={`nav-item has-treeview ${isCadastroOpen ? 'menu-open' : ''}`}>
+              <a href="#" className={`nav-link ${isCadastroOpen ? 'active' : ''}`} onClick={handleCadastroToggle}>
                 <i className="nav-icon fas fa-users"></i>
                 <p>
                   Cadastro
@@ -30,7 +49,7 @@ const Aside = () => {
               <ul className="nav nav-treeview">
                 {permissions.cliente > 0 && (
                   <li className="nav-item">
-                    <Link to="/clients" className="nav-link">
+                    <Link to="/clients" className={`nav-link ${isClientsActive ? 'active' : ''}`}>
                       <i className="far fa-circle nav-icon text-warning"></i>
                       <p>Clientes</p>
                     </Link>
@@ -38,7 +57,7 @@ const Aside = () => {
                 )}
                 {permissions.fornecedor > 0 && (
                   <li className="nav-item">
-                    <Link to="/providers" className="nav-link">
+                    <Link to="/providers" className={`nav-link ${isProvidersActive ? 'active' : ''}`}>
                       <i className="far fa-circle nav-icon text-purple"></i>
                       <p>Fornecedores</p>
                     </Link>
@@ -46,7 +65,7 @@ const Aside = () => {
                 )}
                 {permissions.cadusuario > 0 && (
                   <li className="nav-item">
-                    <Link to="/users" className="nav-link">
+                    <Link to="/users" className={`nav-link ${isUsersActive ? 'active' : ''}`}>
                       <i className="far fa-circle nav-icon text-danger"></i>
                       <p>Usuários</p>
                     </Link>

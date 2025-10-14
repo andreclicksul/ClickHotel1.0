@@ -10,6 +10,8 @@ async function userRoutes(app) {
     app.get('/readuser/:id', async (request, reply) => await (0, users_1.readUserIdHandler)(request, reply));
     // create user
     app.post('/createuser', async (request, reply) => await (0, users_1.createUserHandler)(request, reply));
+    // update user
+    app.put('/updateuser/:id', async (request, reply) => await (0, users_1.updateUserHandler)(request, reply));
     // Authenticate
     app.post('/authenticate', async (request, reply) => await (0, users_1.loginRouterHandler)(request, reply));
 }

@@ -3,7 +3,8 @@ import fastify from 'fastify'
 import cors from '@fastify/cors'
 import fastifyJwt from '@fastify/jwt'
 import { userRoutes } from './routes/users'
-import { readPermissionUserIdHandler } from './services/users'
+import { readPermissionSchema } from './schemas/users'
+import { difTime } from './lib/users'
 
 export const app = fastify()
 
@@ -13,7 +14,9 @@ const jwtsecret = process.env.JWT_SECRET
 const authUrl: object = {
   '/readusers': true,
   '/readuser/:id': true,
-  '/createuser': false,
+  '/updateuser/:id': true,
+  '/deleteuser/:id': true,
+  '/createuser': true,
   '/readpermissionuser/:id': true,
   '/authenticate': false,
 }
@@ -37,11 +40,24 @@ app.addHook('onRequest', async (req, reply) => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     if (authUrl[path]) {
-      await req.jwtVerify()
-      readPermissionUserIdHandler(req, reply)
+      const payload = await req.jwtVerify()
+
+      const { starthour, startminute, finishhour, finishminute } =
+        readPermissionSchema.parse(payload)
+
+      const isTimeRestricted = difTime(
+        starthour,
+        startminute,
+        finishhour,
+        finishminute,
+      )
+
+      if (isTimeRestricted) {
+        return reply.code(403).send({ msg: 'Sessão encerrada', error: 'time restriction' })
+      }
     }
   } catch (error) {
-    reply.code(403).send({ msg: 'Sessão encerrada', error })
+    return reply.code(403).send({ msg: 'Sessão encerrada', error })
   }
 })
 

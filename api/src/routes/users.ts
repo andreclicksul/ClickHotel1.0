@@ -5,6 +5,8 @@ import {
   readUsersHandler,  
   readUserIdHandler, 
   createUserHandler,
+  updateUserHandler,
+  deleteUserHandler,
   readPermissionUserIdHandler,
 } from '../services/users'
 
@@ -23,6 +25,14 @@ export async function userRoutes(app: FastifyInstance) {
   // create user
   app.post('/createuser', async (request: FastifyRequest, reply: FastifyReply) => 
     await createUserHandler(request, reply))
+
+  // update user
+  app.put('/updateuser/:id', async (request: FastifyRequest, reply: FastifyReply) =>
+    await updateUserHandler(request, reply))
+
+  // soft delete user
+  app.patch('/deleteuser/:id', async (request: FastifyRequest, reply: FastifyReply) =>
+    await deleteUserHandler(request, reply))
 
   // Authenticate
   app.post('/authenticate', async (request: FastifyRequest, reply: FastifyReply) => 

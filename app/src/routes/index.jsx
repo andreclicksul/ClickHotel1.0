@@ -9,6 +9,9 @@ import Forgot from "../pages/Login/forgot"
 import ForgotSend from "../pages/Login/forgot-send"
 import ForgotReset from "../pages/Login/forgot-reset"
 import ForgotResetSuccess from "../pages/Login/forgot-reset-sucecess"
+import Users from "../pages/Users"
+import UsersCreate from "../pages/Users/create"
+import UsersUpdate from "../pages/Users/update"
 
 import { AuthProvider } from "../contexts/auth"
 import { Private } from "../components/ProtectedLayout"
@@ -22,6 +25,9 @@ const RoutesApp = () => (
         <Route path="/clients" element={<Private><Clients /></Private>} />
         <Route path="/clients/create" element={<Private><ClientsCreate /></Private>} />
         <Route path="/clients/update/:code" element={<Private><ClientsUpdate /></Private>} />
+        <Route path="/users" element={<Private><Users /></Private>} />
+        <Route path="/users/create" element={<Private><UsersCreate /></Private>} />
+        <Route path="/users/update/:id" element={<Private><UsersUpdate /></Private>} />
         <Route path="/forgot" element={<Forgot />} />
         <Route path="/forgotsend" element={<PrivateEmail><ForgotSend /></PrivateEmail>} />
         <Route path="/forgotreset/:code" element={<ForgotReset />} />

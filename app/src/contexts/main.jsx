@@ -27,12 +27,17 @@ export const MainProvider = ({ children }) => {
   const [ permissions, setPermissions ] = useState({
     cliente: 0,
     cadusuario: 0,
+    checklist: 0,
+    fornecedor: 0,
+    auditoria: 0,
     financeiro: 0,
     billing: 0,
     cp: 0,
     cr: 0,
-    fornecedor: 0,
-    auditoria: 0
+    accountpay: 0,
+    accountreceive: 0,
+    product: 0,
+    occupationmap: 0,
   })
 
   const { user, logout } = useContext(AuthContext)
@@ -72,14 +77,19 @@ export const MainProvider = ({ children }) => {
       })
 
       setPermissions({
-        cliente: response.cliente,
-        cadusuario: response.cadusuario,
-        financeiro: response.financeiro,
-        billing: response.billing ?? response.checklist ?? 0,
-        cp: response.cp ?? 0,
-        cr: response.cr ?? 0,
+        cliente: response.cliente ?? 0,
+        cadusuario: response.cadusuario ?? 0,
+        checklist: response.checklist ?? response.billing ?? 0,
         fornecedor: response.fornecedor ?? 0,
-        auditoria: response.auditoria ?? 0
+        auditoria: response.auditoria ?? 0,
+        financeiro: response.financeiro ?? 0,
+        billing: response.billing ?? response.checklist ?? 0,
+        cp: response.cp ?? response.accountpay ?? 0,
+        cr: response.cr ?? response.accountreceive ?? 0,
+        accountpay: response.accountpay ?? response.cp ?? 0,
+        accountreceive: response.accountreceive ?? response.cr ?? 0,
+        product: response.produto ?? response.product ?? 0,
+        occupationmap: response.occupationmap ?? 0,
       })
       
      } catch (e) {
