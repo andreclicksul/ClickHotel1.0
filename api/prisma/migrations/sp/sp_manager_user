@@ -1,0 +1,334 @@
+CREATE OR REPLACE FUNCTION public.sp_manage_user(
+  p_action           text,
+  p_id               uuid DEFAULT NULL,
+  p_user             text DEFAULT NULL,
+  p_name             text DEFAULT NULL,
+  p_email            text DEFAULT NULL,
+  p_phone            text DEFAULT NULL,
+  p_password         text DEFAULT NULL,
+  p_sunday           boolean DEFAULT false,
+  p_monday           boolean DEFAULT false,
+  p_tuesday          boolean DEFAULT false,
+  p_wednesday        boolean DEFAULT false,
+  p_thursday         boolean DEFAULT false,
+  p_friday           boolean DEFAULT false,
+  p_saturday         boolean DEFAULT false,
+  p_client           integer DEFAULT 0,
+  p_caduser          integer DEFAULT 0,
+  p_checklist        integer DEFAULT 0,
+  p_provider         integer DEFAULT 0,
+  p_audit            integer DEFAULT 0,
+  p_accountpay       integer DEFAULT 0,
+  p_accountreceive   integer DEFAULT 0,
+  p_financial        integer DEFAULT 0,
+  p_product          integer DEFAULT 0,
+  p_occupationmap    integer DEFAULT 0,
+  p_inactive         boolean DEFAULT false,
+  p_lastchange       text DEFAULT NULL,
+  p_color            text DEFAULT 'skin-blue',
+  p_avatar           integer DEFAULT 0,
+  p_starthour        text DEFAULT '00',
+  p_startminute      text DEFAULT '00',
+  p_finishhour       text DEFAULT '00',
+  p_finishminute     text DEFAULT '00',
+  p_ipaccess         text DEFAULT NULL,
+  p_actor_id         uuid DEFAULT NULL
+)
+RETURNS uuid
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_existing     tb_users%ROWTYPE;
+  v_updated      tb_users%ROWTYPE;
+  v_target_id    uuid;
+  v_before       text := '';
+  v_after        text := '';
+  v_diff_before  text := '';
+  v_diff_after   text := '';
+  v_fields       text[][] := ARRAY[
+    ARRAY['USUARIO',        'user'],
+    ARRAY['NOME',           'name'],
+    ARRAY['EMAIL',          'email'],
+    ARRAY['PHONE',          'phone'],
+    ARRAY['DOMINGO',        'sunday'],
+    ARRAY['SEGUNDA',        'monday'],
+    ARRAY['TERCA',          'tuesday'],
+    ARRAY['QUARTA',         'wednesday'],
+    ARRAY['QUINTA',         'thursday'],
+    ARRAY['SEXTA',          'friday'],
+    ARRAY['SABADO',         'saturday'],
+    ARRAY['CLIENTE',        'client'],
+    ARRAY['CADUSUARIO',     'caduser'],
+    ARRAY['CHECKLIST',      'checklist'],
+    ARRAY['FORNECEDOR',     'provider'],
+    ARRAY['AUDITORIA',      'audit'],
+    ARRAY['CONTA_PAGAR',    'accountpay'],
+    ARRAY['CONTA_RECEBER',  'accountreceive'],
+    ARRAY['FINANCEIRO',     'financial'],
+    ARRAY['PRODUTO',        'product'],
+    ARRAY['MAPA_OCUPACAO',  'occupationmap'],
+    ARRAY['INATIVO',        'inactive'],
+    ARRAY['COR',            'color'],
+    ARRAY['AVATAR',         'avatar'],
+    ARRAY['HORARIO_INICIO', 'starthour'],
+    ARRAY['MINUTO_INICIO',  'startminute'],
+    ARRAY['HORARIO_FIM',    'finishhour'],
+    ARRAY['MINUTO_FIM',     'finishminute']
+  ];
+  v_label   text;
+  v_column  text;
+  v_old     text;
+  v_new     text;
+BEGIN
+  -- garante fuso horário
+  PERFORM set_config('TimeZone', 'America/Sao_Paulo', true);
+
+  p_action := upper(coalesce(p_action, ''));
+
+  IF p_action NOT IN ('INS', 'ALT', 'DEL') THEN
+    RAISE EXCEPTION 'Ação inválida: %', p_action USING ERRCODE = '22000';
+  END IF;
+
+  ----------------------------------------------------------
+  -- INSERT
+  ----------------------------------------------------------
+  IF p_action = 'INS' THEN
+    SELECT *
+      INTO v_existing
+      FROM tb_users
+     WHERE "user" = p_user OR email = p_email
+     LIMIT 1;
+
+    IF FOUND AND NOT v_existing.deleted THEN
+      RAISE EXCEPTION 'Usuário ou e-mail já cadastrado.' USING ERRCODE = '23505';
+    END IF;
+
+    IF FOUND AND v_existing.deleted THEN
+      UPDATE tb_users
+         SET "user"         = p_user,
+             name           = p_name,
+             email          = p_email,
+             phone          = p_phone,
+             password       = p_password,
+             sunday         = p_sunday,
+             monday         = p_monday,
+             tuesday        = p_tuesday,
+             wednesday      = p_wednesday,
+             thursday       = p_thursday,
+             friday         = p_friday,
+             saturday       = p_saturday,
+             client         = p_client,
+             caduser        = p_caduser,
+             checklist      = p_checklist,
+             provider       = p_provider,
+             audit          = p_audit,
+             accountpay     = p_accountpay,
+             accountreceive = p_accountreceive,
+             financial      = p_financial,
+             product        = p_product,
+             occupationmap  = p_occupationmap,
+             inactive       = p_inactive,
+             lastchange     = p_lastchange,
+             color          = p_color,
+             avatar         = p_avatar,
+             starthour      = p_starthour,
+             startminute    = p_startminute,
+             finishhour     = p_finishhour,
+             finishminute   = p_finishminute,
+             deleted        = false
+       WHERE id = v_existing.id
+       RETURNING * INTO v_updated;
+    ELSE
+      v_target_id := coalesce(p_id, gen_random_uuid());
+
+      INSERT INTO tb_users (
+        id,
+        "user", name, email, phone, password,
+        sunday, monday, tuesday, wednesday, thursday, friday, saturday,
+        client, caduser, checklist, provider, audit,
+        accountpay, accountreceive, financial, product, occupationmap,
+        inactive, lastchange, color, avatar,
+        starthour, startminute, finishhour, finishminute
+      ) VALUES (
+        v_target_id,
+        p_user, p_name, p_email, p_phone, p_password,
+        p_sunday, p_monday, p_tuesday, p_wednesday, p_thursday, p_friday, p_saturday,
+        p_client, p_caduser, p_checklist, p_provider, p_audit,
+        p_accountpay, p_accountreceive, p_financial, p_product, p_occupationmap,
+        p_inactive, p_lastchange, p_color, p_avatar,
+        p_starthour, p_startminute, p_finishhour, p_finishminute
+      )
+      RETURNING * INTO v_updated;
+    END IF;
+
+    v_target_id := v_updated.id;
+
+    FOR i IN 1 .. array_length(v_fields, 1) LOOP
+      v_label  := v_fields[i][1];
+      v_column := v_fields[i][2];
+      v_new    := upper(coalesce(to_jsonb(v_updated) ->> v_column, ''));
+
+      IF FOUND AND v_existing.deleted THEN
+        v_old := upper(coalesce(to_jsonb(v_existing) ->> v_column, ''));
+        v_before := v_before || v_label || ':' || v_old || ',';
+      END IF;
+
+      v_after := v_after || v_label || ':' || v_new || ',';
+    END LOOP;
+
+    INSERT INTO tb_audit(
+      typemodule,
+      module,
+      beforeinf,
+      currentinf,
+      ipaccess,
+      iduser
+    )
+    VALUES (
+      'INS',
+      'USUARIO',
+      CASE WHEN v_before <> '' THEN v_before ELSE NULL END,
+      v_after,
+      coalesce(p_ipaccess,''),
+      coalesce(p_actor_id, v_target_id)
+    );
+
+  ----------------------------------------------------------
+  -- UPDATE
+  ----------------------------------------------------------
+  ELSIF p_action = 'ALT' THEN
+    IF p_id IS NULL THEN
+      RAISE EXCEPTION 'Para ALT informe p_id.' USING ERRCODE = '22000';
+    END IF;
+
+    SELECT *
+      INTO v_existing
+      FROM tb_users
+     WHERE id = p_id AND deleted = false;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Usuário não encontrado.' USING ERRCODE = '22003';
+    END IF;
+
+    UPDATE tb_users
+       SET "user"         = coalesce(p_user, v_existing."user"),
+           name           = coalesce(p_name, v_existing.name),
+           email          = coalesce(p_email, v_existing.email),
+           phone          = coalesce(p_phone, v_existing.phone),
+           password       = coalesce(p_password, v_existing.password),
+           sunday         = coalesce(p_sunday, v_existing.sunday),
+           monday         = coalesce(p_monday, v_existing.monday),
+           tuesday        = coalesce(p_tuesday, v_existing.tuesday),
+           wednesday      = coalesce(p_wednesday, v_existing.wednesday),
+           thursday       = coalesce(p_thursday, v_existing.thursday),
+           friday         = coalesce(p_friday, v_existing.friday),
+           saturday       = coalesce(p_saturday, v_existing.saturday),
+           client         = coalesce(p_client, v_existing.client),
+           caduser        = coalesce(p_caduser, v_existing.caduser),
+           checklist      = coalesce(p_checklist, v_existing.checklist),
+           provider       = coalesce(p_provider, v_existing.provider),
+           audit          = coalesce(p_audit, v_existing.audit),
+           accountpay     = coalesce(p_accountpay, v_existing.accountpay),
+           accountreceive = coalesce(p_accountreceive, v_existing.accountreceive),
+           financial      = coalesce(p_financial, v_existing.financial),
+           product        = coalesce(p_product, v_existing.product),
+           occupationmap  = coalesce(p_occupationmap, v_existing.occupationmap),
+           inactive       = coalesce(p_inactive, v_existing.inactive),
+           lastchange     = coalesce(p_lastchange, v_existing.lastchange),
+           color          = coalesce(p_color, v_existing.color),
+           avatar         = coalesce(p_avatar, v_existing.avatar),
+           starthour      = coalesce(p_starthour, v_existing.starthour),
+           startminute    = coalesce(p_startminute, v_existing.startminute),
+           finishhour     = coalesce(p_finishhour, v_existing.finishhour),
+           finishminute   = coalesce(p_finishminute, v_existing.finishminute)
+     WHERE id = p_id
+     RETURNING * INTO v_updated;
+
+    v_target_id := v_updated.id;
+    v_diff_before := '';
+    v_diff_after  := '';
+
+    FOR i IN 1 .. array_length(v_fields, 1) LOOP
+      v_label  := v_fields[i][1];
+      v_column := v_fields[i][2];
+      v_old    := upper(coalesce(to_jsonb(v_existing) ->> v_column, ''));
+      v_new    := upper(coalesce(to_jsonb(v_updated)  ->> v_column, ''));
+
+      IF v_old <> v_new THEN
+        v_diff_before := v_diff_before || v_label || ':' || v_old || ',';
+        v_diff_after  := v_diff_after  || v_label || ':' || v_new || ',';
+      END IF;
+    END LOOP;
+
+    IF v_diff_before <> '' THEN
+      INSERT INTO tb_audit(
+        typemodule,
+        module,
+        beforeinf,
+        currentinf,
+        ipaccess,
+        iduser
+      )
+      VALUES (
+        'ALT',
+        'USUARIO',
+        v_diff_before,
+        v_diff_after,
+        coalesce(p_ipaccess,''),
+        coalesce(p_actor_id, v_target_id)
+      );
+    END IF;
+
+  ----------------------------------------------------------
+  -- DELETE (soft)
+  ----------------------------------------------------------
+  ELSIF p_action = 'DEL' THEN
+    IF p_id IS NULL THEN
+      RAISE EXCEPTION 'Para DEL informe p_id.' USING ERRCODE = '22000';
+    END IF;
+
+    SELECT *
+      INTO v_existing
+      FROM tb_users
+     WHERE id = p_id AND deleted = false;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Usuário não encontrado.' USING ERRCODE = '22003';
+    END IF;
+
+    UPDATE tb_users
+       SET deleted = true,
+           inactive = true
+     WHERE id = p_id
+     RETURNING id INTO v_target_id;
+
+    v_before := '';
+
+    FOR i IN 1 .. array_length(v_fields, 1) LOOP
+      v_label  := v_fields[i][1];
+      v_column := v_fields[i][2];
+      v_old    := upper(coalesce(to_jsonb(v_existing) ->> v_column, ''));
+      v_before := v_before || v_label || ':' || v_old || ',';
+    END LOOP;
+
+    INSERT INTO tb_audit(
+      typemodule,
+      module,
+      beforeinf,
+      currentinf,
+      ipaccess,
+      iduser
+    )
+    VALUES (
+      'DEL',
+      'USUARIO',
+      v_before,
+      '',
+      coalesce(p_ipaccess,''),
+      coalesce(p_actor_id, v_target_id)
+    );
+  END IF;
+
+  RETURN v_target_id;
+END;
+$$;

@@ -1,5 +1,44 @@
-1-Verificar se há a possibilidade de criar store prcedure no postgres
+1-Verificar se há a possibilidade de criar store prcedure no postgres - criamos mas está dando erro ao criar usuário
 2-Separar a rotina da gravação do audit para que possa ser utilizado por todos os cadastros
+
+testar a select abaixo para ver se a store procedure está funcionando
+
+SELECT public.sp_manage_user(
+  p_action         => 'INS',
+  p_id             => NULL,
+  p_user           => 'teste.sp',
+  p_name           => 'Teste Stored Procedure',
+  p_email          => 'teste.sp@example.com',
+  p_phone          => '(11) 9 9999-9999',
+  p_password       => '$2b$12$pMdszD.GlqcDxnyRMs8l2.XVuvCntnyDfateoKfmBf99X5CL.jcWC',
+  p_sunday         => TRUE,
+  p_monday         => TRUE,
+  p_tuesday        => TRUE,
+  p_wednesday      => TRUE,
+  p_thursday       => TRUE,
+  p_friday         => TRUE,
+  p_saturday       => TRUE,
+  p_client         => 4,
+  p_caduser        => 4,
+  p_checklist      => 4,
+  p_provider       => 4,
+  p_audit          => 4,
+  p_accountpay     => 4,
+  p_accountreceive => 4,
+  p_financial      => 4,
+  p_product        => 4,
+  p_occupationmap  => 4,
+  p_inactive       => FALSE,
+  p_lastchange     => 'ADM',
+  p_color          => 'skin-blue',
+  p_avatar         => 0,
+  p_starthour      => '09',
+  p_startminute    => '00',
+  p_finishhour     => '18',
+  p_finishminute   => '00',
+  p_ipaccess       => '127.0.0.1',
+  p_actor_id       => '0562a4e3-adfe-4b84-b6d6-355a934a5c62'
+);
 
 
 Analisar o menu e criar o primeiro crud, fornecedor

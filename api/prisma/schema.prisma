@@ -9,7 +9,7 @@ datasource db {
 }
 
 model tb_users {
-  id             String     @id @default(uuid())
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user           String     @unique
   name           String
   email          String     @unique
@@ -33,7 +33,7 @@ model tb_users {
   product        Int
   occupationmap  Int
   inactive       Boolean    @default(false)
-  dtregister     DateTime   @default(now())
+  dtregister     DateTime   @default(dbgenerated("timezone('America/Sao_Paulo', now())"))
   lastchange     String
   color          String
   avatar         Int
@@ -46,13 +46,13 @@ model tb_users {
 }
 
 model tb_audit {
-  id         String   @id @default(uuid())
-  dtregister DateTime @default(now())
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dtregister DateTime @default(dbgenerated("timezone('America/Sao_Paulo', now())"))
   typemodule String
   module     String
   beforeinf  String?
   currentinf String?
   ipaccess   String
-  iduser     String
+  iduser     String   @db.Uuid
   user       tb_users @relation(fields: [iduser], references: [id])
 }

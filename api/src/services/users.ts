@@ -15,103 +15,40 @@ import {
 } from '../schemas/users'
 import { findUserAuthentication } from '../middlewares/user.services'
 
-const resolveUniqueConstraintMessage = (
-  error: PrismaClientKnownRequestError,
-) => {
-  const target = Array.isArray(error.meta?.target)
-    ? error.meta?.target?.[0]
-    : error.meta?.target
+const userSelect = {
+  id: true,
+  user: true,
+  name: true,
+  email: true,
+  phone: true,
+  sunday: true,
+  monday: true,
+  tuesday: true,
+  wednesday: true,
+  thursday: true,
+  friday: true,
+  saturday: true,
+  client: true,
+  caduser: true,
+  checklist: true,
+  provider: true,
+  audit: true,
+  accountpay: true,
+  accountreceive: true,
+  financial: true,
+  product: true,
+  occupationmap: true,
+  inactive: true,
+  lastchange: true,
+  color: true,
+  avatar: true,
+  starthour: true,
+  startminute: true,
+  finishhour: true,
+  finishminute: true,
+  deleted: true,
+} as const
 
-  const field =
-    typeof target === 'string' && target.toLowerCase().includes('email')
-      ? 'E-mail'
-      : 'Usuário'
-
-  return `${field} já cadastrado.`
-}
-
-const AUDIT_FIELDS: Array<{ key: string; label: string }> = [
-  { key: 'user', label: 'USUARIO' },
-  { key: 'name', label: 'NOME' },
-  { key: 'email', label: 'EMAIL' },
-  { key: 'phone', label: 'PHONE' },
-  { key: 'sunday', label: 'DOMINGO' },
-  { key: 'monday', label: 'SEGUNDA' },
-  { key: 'tuesday', label: 'TERCA' },
-  { key: 'wednesday', label: 'QUARTA' },
-  { key: 'thursday', label: 'QUINTA' },
-  { key: 'friday', label: 'SEXTA' },
-  { key: 'saturday', label: 'SABADO' },
-  { key: 'client', label: 'CLIENTE' },
-  { key: 'caduser', label: 'CADUSUARIO' },
-  { key: 'checklist', label: 'CHECKLIST' },
-  { key: 'provider', label: 'FORNECEDOR' },
-  { key: 'audit', label: 'AUDITORIA' },
-  { key: 'accountpay', label: 'CONTA_PAGAR' },
-  { key: 'accountreceive', label: 'CONTA_RECEBER' },
-  { key: 'financial', label: 'FINANCEIRO' },
-  { key: 'product', label: 'PRODUTO' },
-  { key: 'occupationmap', label: 'MAPA_OCUPACAO' },
-  { key: 'inactive', label: 'INATIVO' },
-  { key: 'color', label: 'COR' },
-  { key: 'avatar', label: 'AVATAR' },
-  { key: 'starthour', label: 'HORARIO_INICIO' },
-  { key: 'startminute', label: 'MINUTO_INICIO' },
-  { key: 'finishhour', label: 'HORARIO_FIM' },
-  { key: 'finishminute', label: 'MINUTO_FIM' },
-]
-
-const formatAuditValue = (value: unknown) => {
-  if (typeof value === 'string') {
-    return value.toUpperCase()
-  }
-
-  if (typeof value === 'boolean') {
-    return value ? 'TRUE' : 'FALSE'
-  }
-
-  if (value === null || value === undefined) {
-    return ''
-  }
-
-  return String(value).toUpperCase()
-}
-
-const buildUserAuditString = (user: Record<string, any>) => {
-  const result = AUDIT_FIELDS.map(({ key, label }) => {
-    const value = user?.[key as keyof typeof user]
-    return `${label}:${formatAuditValue(value)}`
-  }).join(',')
-
-  return `${result},`
-}
-
-const buildUserAuditDiff = (
-  before: Record<string, any>,
-  after: Record<string, any>,
-) => {
-  const changedFields = AUDIT_FIELDS.filter(({ key }) => {
-    const beforeVal = before?.[key as keyof typeof before]
-    const afterVal = after?.[key as keyof typeof after]
-    return beforeVal !== afterVal
-  })
-
-  if (!changedFields.length) {
-    return { before: null, after: null }
-  }
-
-  const beforeEntries = changedFields
-    .map(({ key, label }) => `${label}:${formatAuditValue(before?.[key as keyof typeof before])}`)
-    .join(',')
-  const afterEntries = changedFields
-    .map(({ key, label }) => `${label}:${formatAuditValue(after?.[key as keyof typeof after])}`)
-    .join(',')
-
-  return {
-    before: `${beforeEntries},`,
-    after: `${afterEntries},`,
-  }
-}
 
 export const loginRouterHandler = async (
   request: FastifyRequest,
@@ -341,172 +278,71 @@ export const createUserHandler = async (
         .send({ status: 403, msg: 'Permissão insuficiente para criar usuários.' })
     }
 
-    const parsed = updateSchema.parse(request.body)
-
-    const {
-      user,
-      name,
-      email,
-      phone,
-      password,
-      sunday,
-      monday,
-      tuesday,
-      wednesday,
-      thursday,
-      friday,
-      saturday,
-      client,
-      caduser,
-      checklist,
-      provider,
-      audit,
-      accountpay,
-      accountreceive,
-      financial,
-      product,
-      occupationmap,
-      inactive,
-      lastchange,
-      color,
-      avatar,
-      starthour,
-      startminute,
-      finishhour,
-      finishminute,
-    } = parsed
-
-    const normalizedPhone =
-      typeof phone === 'string' ? phone.trim() : ''
+    const parsed = createSchema.parse(request.body)
 
     const salt = await bcrypt.genSalt(12)
-    const passwordHash = await bcrypt.hash(password ?? '', salt)
+    const passwordHash = await bcrypt.hash(parsed.password ?? '', salt)
 
-    const existingUser = await prisma.tb_users.findFirst({
-      where: {
-        OR: [{ user }, { email }],
-      },
+    const spResult = await prisma.$queryRaw<
+      { sp_manage_user: string }[]
+    >`
+      SELECT public.sp_manage_user(
+        ${'INS'}::text,
+        ${null}::uuid,
+        ${parsed.user}::text,
+        ${parsed.name}::text,
+        ${parsed.email}::text,
+        ${parsed.phone}::text,
+        ${passwordHash}::text,
+        ${parsed.sunday}::boolean,
+        ${parsed.monday}::boolean,
+        ${parsed.tuesday}::boolean,
+        ${parsed.wednesday}::boolean,
+        ${parsed.thursday}::boolean,
+        ${parsed.friday}::boolean,
+        ${parsed.saturday}::boolean,
+        ${parsed.client}::int,
+        ${parsed.caduser}::int,
+        ${parsed.checklist}::int,
+        ${parsed.provider}::int,
+        ${parsed.audit}::int,
+        ${parsed.accountpay}::int,
+        ${parsed.accountreceive}::int,
+        ${parsed.financial}::int,
+        ${parsed.product}::int,
+        ${parsed.occupationmap}::int,
+        ${parsed.inactive}::boolean,
+        ${parsed.lastchange}::text,
+        ${parsed.color}::text,
+        ${parsed.avatar}::int,
+        ${parsed.starthour}::text,
+        ${parsed.startminute}::text,
+        ${parsed.finishhour}::text,
+        ${parsed.finishminute}::text,
+        ${request.ip ?? null}::text,
+        ${payload.id ?? null}::uuid
+      )
+    `
+
+    const newUserId = spResult?.[0]?.sp_manage_user
+
+    if (!newUserId) {
+      throw new Error('Falha ao criar usuário.')
+    }
+
+    const createdUser = await prisma.tb_users.findUnique({
+      select: userSelect,
+      where: { id: newUserId },
     })
 
-    if (existingUser && !existingUser.deleted) {
-      return reply.code(409).send({
-        status: 409,
-        msg:
-          existingUser.user === user
-            ? 'Usuário já cadastrado.'
-            : 'E-mail já cadastrado.',
-      })
+    if (!createdUser) {
+      throw new Error('Usuário criado não localizado.')
     }
 
-    let createdUser
-
-    if (existingUser && existingUser.deleted) {
-      createdUser = await prisma.tb_users.update({
-        where: { id: existingUser.id },
-        data: {
-          user,
-          name,
-          email,
-          phone: normalizedPhone !== '' ? normalizedPhone : null,
-          password: passwordHash,
-          sunday,
-          monday,
-          tuesday,
-          wednesday,
-          thursday,
-          friday,
-          saturday,
-          client,
-          caduser,
-          checklist,
-          provider,
-          audit,
-          accountpay,
-          accountreceive,
-          financial,
-          product,
-          occupationmap,
-          inactive: inactive ?? false,
-          lastchange,
-          color,
-          avatar,
-          starthour,
-          startminute,
-          finishhour,
-          finishminute,
-          deleted: false,
-        },
-      })
-    } else {
-      createdUser = await prisma.tb_users.create({
-        data: {
-          user,
-          name,
-          email,
-          phone: normalizedPhone !== '' ? normalizedPhone : null,
-          password: passwordHash,
-          sunday,
-          monday,
-          tuesday,
-          wednesday,
-          thursday,
-          friday,
-          saturday,
-          client,
-          caduser,
-          checklist,
-          provider,
-          audit,
-          accountpay,
-          accountreceive,
-          financial,
-          product,
-          occupationmap,
-          inactive: inactive ?? false,
-          lastchange,
-          color,
-          avatar,
-          starthour,
-          startminute,
-          finishhour,
-          finishminute,
-        },
-      })
-    }
-
-    const { password: _password, ...safeUser } = createdUser
-
-    try {
-      await prisma.tb_audit.create({
-        data: {
-          typemodule: 'INS',
-          module: 'USUARIO',
-          beforeinf:
-            existingUser && existingUser.deleted
-              ? buildUserAuditString(existingUser)
-              : null,
-          currentinf: buildUserAuditString(safeUser),
-          ipaccess: request.ip ?? '',
-          iduser: String(payload.id ?? ''),
-        },
-      })
-    } catch (auditError) {
-      // audit failures must not block user creation
-    }
-
-    reply.code(201).send({ status: 201, msg: 'Usuário criado com sucesso.', data: safeUser })
-    // return { status: 200, createuser, typeErr: 'OK' }
+    reply
+      .code(201)
+      .send({ status: 201, msg: 'Usuário criado com sucesso.', data: createdUser })
   } catch (error: any) {
-    if (
-      error instanceof PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
-      return reply.code(409).send({
-        status: 409,
-        msg: resolveUniqueConstraintMessage(error),
-      })
-    }
-
     if (error instanceof ZodError) {
       return reply.code(400).send({
         status: 400,
@@ -515,12 +351,44 @@ export const createUserHandler = async (
       })
     }
 
+    let cause = ''
+
+    if (error instanceof PrismaClientKnownRequestError) {
+      cause = String(error.meta?.cause ?? error.message ?? '')
+    } else if (error instanceof Error) {
+      cause = error.message
+    } else {
+      cause = String(error)
+    }
+
+    if (
+      error instanceof PrismaClientKnownRequestError &&
+      cause.includes('Usuário ou e-mail já cadastrado')
+    ) {
+      return reply.code(409).send({ status: 409, msg: 'Usuário já existente.' })
+    }
+
+    if (
+      error instanceof PrismaClientKnownRequestError &&
+      cause.toLowerCase().includes('already exists')
+    ) {
+      return reply.code(409).send({ status: 409, msg: 'Usuário já existente.' })
+    }
+
+    if (
+      error instanceof PrismaClientKnownRequestError &&
+      cause.toLowerCase().includes('usuário não encontrado')
+    ) {
+      return reply.code(404).send({ status: 404, msg: 'Usuário não encontrado.' })
+    }
+
+    console.error('createUserHandler error:', error)
+
     reply.code(500).send({
       status: 500,
       msg: 'Erro ao criar usuário.',
-      error: `${error}`,
+      error: cause || `${error}`,
     })
-    // return { status: 401, error, typeErr: textErr }
   }
 }
 
@@ -545,6 +413,7 @@ export const updateUserHandler = async (
     }
 
     const existingUser = await prisma.tb_users.findUnique({
+      select: userSelect,
       where: { id },
     })
 
@@ -556,97 +425,65 @@ export const updateUserHandler = async (
 
     const parsed = updateSchema.parse(request.body)
 
-    const normalizedPhone =
-      typeof parsed.phone === 'string'
-        ? parsed.phone.trim()
-        : existingUser.phone ?? ''
+    const passwordHash =
+      typeof parsed.password === 'string' && parsed.password.trim() !== ''
+        ? await bcrypt.hash(parsed.password, await bcrypt.genSalt(12))
+        : null
 
-    let passwordHash: string | undefined
+    await prisma.$queryRaw`
+      SELECT public.sp_manage_user(
+        ${'ALT'}::text,
+        ${id}::uuid,
+        ${parsed.user ?? null}::text,
+        ${parsed.name ?? null}::text,
+        ${parsed.email ?? null}::text,
+        ${parsed.phone ?? null}::text,
+        ${passwordHash}::text,
+        ${parsed.sunday ?? null}::boolean,
+        ${parsed.monday ?? null}::boolean,
+        ${parsed.tuesday ?? null}::boolean,
+        ${parsed.wednesday ?? null}::boolean,
+        ${parsed.thursday ?? null}::boolean,
+        ${parsed.friday ?? null}::boolean,
+        ${parsed.saturday ?? null}::boolean,
+        ${parsed.client ?? null}::int,
+        ${parsed.caduser ?? null}::int,
+        ${parsed.checklist ?? null}::int,
+        ${parsed.provider ?? null}::int,
+        ${parsed.audit ?? null}::int,
+        ${parsed.accountpay ?? null}::int,
+        ${parsed.accountreceive ?? null}::int,
+        ${parsed.financial ?? null}::int,
+        ${parsed.product ?? null}::int,
+        ${parsed.occupationmap ?? null}::int,
+        ${parsed.inactive ?? null}::boolean,
+        ${parsed.lastchange ?? null}::text,
+        ${parsed.color ?? null}::text,
+        ${parsed.avatar ?? null}::int,
+        ${parsed.starthour ?? null}::text,
+        ${parsed.startminute ?? null}::text,
+        ${parsed.finishhour ?? null}::text,
+        ${parsed.finishminute ?? null}::text,
+        ${request.ip ?? null}::text,
+        ${payload.id ?? null}::uuid
+      )
+    `
 
-    if (typeof parsed.password === 'string' && parsed.password.trim() !== '') {
-      const salt = await bcrypt.genSalt(12)
-      passwordHash = await bcrypt.hash(parsed.password, salt)
-    }
-
-    const updatedUser = await prisma.tb_users.update({
+    const updatedUser = await prisma.tb_users.findUnique({
+      select: userSelect,
       where: { id },
-      data: {
-        user: parsed.user ?? existingUser.user,
-        name: parsed.name ?? existingUser.name,
-        email: parsed.email ?? existingUser.email,
-        phone: normalizedPhone !== '' ? normalizedPhone : null,
-        ...(passwordHash ? { password: passwordHash } : {}),
-        sunday: parsed.sunday ?? existingUser.sunday,
-        monday: parsed.monday ?? existingUser.monday,
-        tuesday: parsed.tuesday ?? existingUser.tuesday,
-        wednesday: parsed.wednesday ?? existingUser.wednesday,
-        thursday: parsed.thursday ?? existingUser.thursday,
-        friday: parsed.friday ?? existingUser.friday,
-        saturday: parsed.saturday ?? existingUser.saturday,
-        client: parsed.client ?? existingUser.client,
-        caduser: parsed.caduser ?? existingUser.caduser,
-        checklist: parsed.checklist ?? existingUser.checklist,
-        provider: parsed.provider ?? existingUser.provider,
-        audit: parsed.audit ?? existingUser.audit,
-        accountpay: parsed.accountpay ?? existingUser.accountpay,
-        accountreceive: parsed.accountreceive ?? existingUser.accountreceive,
-        financial: parsed.financial ?? existingUser.financial,
-        product: parsed.product ?? existingUser.product,
-        occupationmap: parsed.occupationmap ?? existingUser.occupationmap,
-        inactive:
-          typeof parsed.inactive === 'boolean'
-            ? parsed.inactive
-            : existingUser.inactive,
-        lastchange: parsed.lastchange ?? existingUser.lastchange,
-        color: parsed.color ?? existingUser.color,
-        avatar: parsed.avatar ?? existingUser.avatar,
-        starthour: parsed.starthour ?? existingUser.starthour,
-        startminute: parsed.startminute ?? existingUser.startminute,
-        finishhour: parsed.finishhour ?? existingUser.finishhour,
-        finishminute: parsed.finishminute ?? existingUser.finishminute,
-      },
     })
 
-    const { password: _password, ...safeUser } = updatedUser
+    if (!updatedUser) {
+      return reply
+        .code(404)
+        .send({ status: 404, msg: 'Usuário não encontrado para atualização.' })
+    }
 
     reply
       .code(200)
-      .send({ status: 200, msg: 'Usuário atualizado com sucesso.', data: safeUser })
-
-    const diff = buildUserAuditDiff(existingUser, safeUser)
-
-    if (diff.before && diff.after) {
-      try {
-        await prisma.tb_audit.create({
-          data: {
-            typemodule: 'ALT',
-            module: 'USUARIO',
-            beforeinf: diff.before,
-            currentinf: diff.after,
-            ipaccess: request.ip ?? '',
-            iduser: String(payload.id ?? ''),
-          },
-        })
-      } catch (auditError) {
-        // ignore audit failure on update
-      }
-    }
+      .send({ status: 200, msg: 'Usuário atualizado com sucesso.', data: updatedUser })
   } catch (error: any) {
-    if (error instanceof PrismaClientKnownRequestError) {
-      if (error.code === 'P2002') {
-        return reply.code(409).send({
-          status: 409,
-          msg: resolveUniqueConstraintMessage(error),
-        })
-      }
-
-      if (error.code === 'P2025') {
-        return reply
-          .code(404)
-          .send({ status: 404, msg: 'Usuário não encontrado para atualização.' })
-      }
-    }
-
     if (error instanceof ZodError) {
       return reply.code(400).send({
         status: 400,
@@ -655,10 +492,55 @@ export const updateUserHandler = async (
       })
     }
 
+    let cause = ''
+
+    if (error instanceof PrismaClientKnownRequestError) {
+      cause = String(error.meta?.cause ?? error.message ?? '')
+    } else if (error instanceof Error) {
+      cause = error.message
+    } else {
+      cause = String(error)
+    }
+
+    if (
+      error instanceof PrismaClientKnownRequestError &&
+      cause.includes('Usuário ou e-mail já cadastrado')
+    ) {
+      return reply.code(409).send({ status: 409, msg: 'Usuário já existente.' })
+    }
+
+    if (
+      error instanceof PrismaClientKnownRequestError &&
+      cause.toLowerCase().includes('already exists')
+    ) {
+      return reply.code(409).send({ status: 409, msg: 'Usuário já existente.' })
+    }
+
+    if (
+      error instanceof PrismaClientKnownRequestError &&
+      cause.toLowerCase().includes('usuário não encontrado')
+    ) {
+      return reply
+        .code(404)
+        .send({ status: 404, msg: 'Usuário não encontrado para atualização.' })
+    }
+
+    if (
+      error instanceof Error &&
+      (
+        cause.toLowerCase().includes('usuário ou e-mail já cadastrado') ||
+        cause.toLowerCase().includes('already exists')
+      )
+    ) {
+      return reply.code(409).send({ status: 409, msg: 'Usuário já existente.' })
+    }
+
+    console.error('updateUserHandler error:', error)
+
     reply.code(500).send({
       status: 500,
       msg: 'Erro ao atualizar usuário.',
-      error: `${error}`,
+      error: cause || `${error}`,
     })
   }
 }
@@ -683,6 +565,7 @@ export const deleteUserHandler = async (
     }
 
     const existingUser = await prisma.tb_users.findUnique({
+      select: userSelect,
       where: { id },
     })
 
@@ -692,50 +575,52 @@ export const deleteUserHandler = async (
         .send({ status: 404, msg: 'Usuário não encontrado para exclusão.' })
     }
 
-    const beforeInfo = buildUserAuditString(existingUser)
+    await prisma.$queryRaw`
+      SELECT public.sp_manage_user(
+        ${'DEL'}::text,
+        ${id}::uuid,
+        ${null}::text, ${null}::text, ${null}::text, ${null}::text, ${null}::text,
+        ${null}::boolean, ${null}::boolean, ${null}::boolean, ${null}::boolean, ${null}::boolean, ${null}::boolean, ${null}::boolean,
+        ${null}::int, ${null}::int, ${null}::int, ${null}::int, ${null}::int, ${null}::int, ${null}::int,
+        ${null}::int, ${null}::int, ${null}::int,
+        ${null}::boolean, ${null}::text, ${null}::text, ${null}::int,
+        ${null}::text, ${null}::text, ${null}::text, ${null}::text,
+        ${request.ip ?? null}::text,
+        ${payload.id ?? null}::uuid
+      )
+    `
 
-    const deletedUser = await prisma.tb_users.update({
+    const deletedUser = await prisma.tb_users.findUnique({
+      select: userSelect,
       where: { id },
-      data: {
-        deleted: true,
-        inactive: true,
-      },
     })
-
-    const { password: _password, ...safeUser } = deletedUser
 
     reply
       .code(200)
-      .send({ status: 200, msg: 'Usuário excluído com sucesso.', data: safeUser })
-
-    try {
-      await prisma.tb_audit.create({
-        data: {
-          typemodule: 'DEL',
-          module: 'USUARIO',
-          beforeinf: beforeInfo,
-          currentinf: '',
-          ipaccess: request.ip ?? '',
-          iduser: String(payload.id ?? ''),
-        },
-      })
-    } catch (auditError) {
-      // ignore audit failure
-    }
+      .send({ status: 200, msg: 'Usuário excluído com sucesso.', data: deletedUser })
   } catch (error: any) {
+    const cause =
+      error instanceof PrismaClientKnownRequestError
+        ? String(error.meta?.cause ?? error.message ?? '')
+        : error instanceof Error
+        ? error.message
+        : String(error)
+
     if (
       error instanceof PrismaClientKnownRequestError &&
-      error.code === 'P2025'
+      cause.toLowerCase().includes('usuário não encontrado')
     ) {
       return reply
         .code(404)
         .send({ status: 404, msg: 'Usuário não encontrado para exclusão.' })
     }
 
+    console.error('deleteUserHandler error:', error)
+
     reply.code(500).send({
       status: 500,
       msg: 'Erro ao excluir usuário.',
-      error: `${error}`,
+      error: cause,
     })
   }
 }
