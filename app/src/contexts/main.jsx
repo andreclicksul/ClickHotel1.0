@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react"
+import { useEffect, useState, useContext, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { MainContext, AuthContext } from "./context"
 import { get } from "../services/api"
@@ -38,6 +38,9 @@ export const MainProvider = ({ children }) => {
     accountreceive: 0,
     product: 0,
     occupationmap: 0,
+    cashflow: 0,
+    restaurant: 0,
+    uh: 0,
   })
 
   const { user, logout } = useContext(AuthContext)
@@ -47,7 +50,11 @@ export const MainProvider = ({ children }) => {
     navigate(`/${staturerr}`)
   }  
 
-  const readPermissionUser = async () => {
+  const readPermissionUser = useCallback(async () => {
+
+    if (!user?.iduser) {
+      return
+    }
 
     try {
       const response = await get(`/readpermissionuser/${user.iduser}`)
@@ -90,6 +97,9 @@ export const MainProvider = ({ children }) => {
         accountreceive: response.accountreceive ?? response.cr ?? 0,
         product: response.produto ?? response.product ?? 0,
         occupationmap: response.occupationmap ?? 0,
+        cashflow: response.cashflow ?? 0,
+        restaurant: response.restaurant ?? 0,
+        uh: response.uh ?? 0,
       })
       
      } catch (e) {
@@ -97,13 +107,13 @@ export const MainProvider = ({ children }) => {
       navigate('/301')
       return     
     }      
-  }
+  }, [logout, navigate, user])
   
   useEffect(() => {
     if (user && !data.iduser) {
       readPermissionUser()
     }
-  }, [user, data.iduser])
+  }, [user, data.iduser, readPermissionUser])
 
   useEffect(() => {
     setSrcAvatar(`/res/admin/avatar/avatar${data.avatar}.png`)

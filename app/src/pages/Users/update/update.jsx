@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom"
 import UserForm from "../components/UserForm"
 import { get, put, patch } from "../../../services/api"
 import { MainContext } from "../../../contexts/context"
@@ -7,10 +7,13 @@ import { MainContext } from "../../../contexts/context"
 const UsersUpdate = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
+  const locationFeedback = location.state?.feedback
   const { logout } = useContext(MainContext)
   const [initialData, setInitialData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState("")
+  const [initialFeedback, setInitialFeedback] = useState(locationFeedback ?? null)
 
   const normalizeUserData = (data = {}) => {
     const ensureTime = (value) => {
@@ -92,6 +95,13 @@ const UsersUpdate = () => {
     }
   }, [id, logout])
 
+  useEffect(() => {
+    if (locationFeedback) {
+      setInitialFeedback(locationFeedback)
+      navigate(location.pathname, { replace: true, state: {} })
+    }
+  }, [locationFeedback, location.pathname, navigate])
+
   const handleUpdate = async (payload) => put(`/updateuser/${id}`, payload)
   const handleDelete = async () => patch(`/deleteuser/${id}`, {})
 
@@ -128,6 +138,7 @@ const UsersUpdate = () => {
     <UserForm
       mode="update"
       initialData={initialData}
+      initialFeedback={initialFeedback}
       loading={loading}
       onSubmit={handleUpdate}
       onDelete={handleDelete}

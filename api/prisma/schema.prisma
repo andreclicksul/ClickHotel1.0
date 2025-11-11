@@ -32,6 +32,9 @@ model tb_users {
   financial      Int
   product        Int
   occupationmap  Int
+  cashflow       Int
+  restaurant     Int
+  uh             Int
   inactive       Boolean    @default(false)
   dtregister     DateTime   @default(dbgenerated("timezone('America/Sao_Paulo', now())"))
   lastchange     String

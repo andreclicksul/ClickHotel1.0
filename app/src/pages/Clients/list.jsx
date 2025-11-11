@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react"
+import { useContext, useEffect, useState, useCallback } from "react"
 import { Link } from "react-router-dom"
 import { AuthContext, MainContext } from "../../contexts/context"
 import { get } from "../../services/api"
@@ -10,12 +10,14 @@ const ListAll = () => {
   const { user } = useContext(AuthContext)
 
   const { logout } = useContext(MainContext)  
-
-  const [ secread, setSecread] = useState('')
-  
+ 
   const [ secinsert, setSecinsert] = useState('')
 
-  const list = async () => {
+  const list = useCallback(async () => {
+
+    if (!user) {
+      return
+    }
 
     try {
       const response = await get(`clients.php?op=0&email=${user.email}&token=${user.token}`)
@@ -51,6 +53,8 @@ const ListAll = () => {
         }
       ]
 
+      const secReadClass = response.secRead ?? ''
+
       let arrayData = response.clients.map(item => 
         [
           item.idclient,
@@ -59,7 +63,7 @@ const ListAll = () => {
           item.descel, 
           item.desemail, 
           item.desresponsavel, 
-          `<a href="/clients/update/${item.idclient}" class="btn btn-warning btn-sm ${secread}">
+          `<a href="/clients/update/${item.idclient}" class="btn btn-warning btn-sm ${secReadClass}">
             <i class="fa fa-pencil-square"></i>&nbsp;&nbsp;&nbsp;Editar
            </a>`
         ]
@@ -83,23 +87,21 @@ const ListAll = () => {
         deferRender: true
       })
 
-      setSecread(response.secRead)
-
       setSecinsert(response.secInsert)
 
     } catch (e) {
       logout('301')
       return     
     }     
-  }
+  }, [logout, user])
 
-  useEffect( () => {
+  useEffect(() => {
     list()
-  }, [])
+  }, [list])
 
   return (
       <>
-        <section className="content" style={{minHeight: `${innerHeight-142}px` }}>  
+        <section className="content" style={{minHeight: `${height - 142}px` }}>  
           <div className="row">
             <div className="col-md-12">
               <div className="card card-warning">

@@ -1,4 +1,4 @@
-import { useEffect, useState, useContext } from "react"
+import { useEffect, useState, useContext, useCallback } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { AuthContext, MainContext } from "../../../contexts/context"
 import { get, getCep, post } from "../../../services/api"
@@ -20,7 +20,7 @@ const ClientsCreate = () => {
   
   const [ invalidcep, setInvalidcep] = useState(false)
 
-  const [ wrong, setWrong ] = useState('')
+  const [ wrong ] = useState('')
 
   const [ data, setData ] = useState({
     desname: '',
@@ -41,7 +41,11 @@ const ClientsCreate = () => {
     inactive: '',
   })
 
-  const getPermission = async () => {
+  const getPermission = useCallback(async () => {
+
+    if (!user) {
+      return
+    }
 
     try {
       const response = await get(`clients.php?op=2&email=${user.email}&token=${user.token}`)
@@ -58,7 +62,7 @@ const ClientsCreate = () => {
       console.log(e)
       return     
     }       
-  }
+  }, [logout, user])
 
   const handleChange = (e) => {
     const value = e.target.value
@@ -168,13 +172,13 @@ const ClientsCreate = () => {
     }
   }
 
-  useEffect( () => {
+  useEffect(() => {
     getPermission()
-  }, [])
+  }, [getPermission])
 
   return (
     <>
-      <section className="content" style={{ minHeight: `${innerHeight-142}px` }}>
+      <section className="content" style={{ minHeight: `${height - 142}px` }}>
         <form role="form" onSubmit={handleSubmit} noValidate>
           <div className="row">
             <div className="col-md-12">

@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router-dom"
 import { MainContext } from "../../contexts/context"
 
 const Aside = () => {
-  const { data = {}, permissions = {} } = useContext(MainContext)
+  const { permissions = {} } = useContext(MainContext)
   const location = useLocation()
   const cadastroRoutes = ['/clients', '/providers', '/users']
   const isCadastroRouteActive = cadastroRoutes.some(route => location.pathname.startsWith(route))
@@ -24,13 +24,21 @@ const Aside = () => {
   const isProvidersActive = location.pathname.startsWith('/providers')
   const isUsersActive = location.pathname.startsWith('/users')
 
-  const avatarSrc = data.srcAvatar || '/res/admin/avatar/avatar1.png'
-  const userName = data.desuser || 'Usuário'
+  const hasCadastroPermission =
+    (permissions.cliente ?? 0) > 0 ||
+    (permissions.fornecedor ?? 0) > 0 ||
+    (permissions.cadusuario ?? 0) > 0
 
   return (
-    <aside className="main-sidebar sidebar-dark-primary elevation-4">
-      <Link to="/home" className="brand-link">
-        <span className="brand-text font-weight-light">Clicksul</span>
+    <aside className="main-sidebar sidebar-dark-primary">
+      <Link
+        to="/home"
+        className="brand-link text-center bg-info"
+        style={{ padding: '0.873rem 0.5rem', borderBottom: 'none', borderRight: 'none', boxShadow: 'none' }}
+      >
+        <span className="brand-text font-weight-light d-block" style={{ fontSize: "1.15rem", color: '#fff' }}>
+          Pousada Visconde de Mauá
+        </span>
       </Link>
 
       <div className="sidebar">
@@ -38,41 +46,43 @@ const Aside = () => {
           <ul className="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
             <li className="nav-header">MENU DE NAVEGAÇÃO</li>
 
-            <li className={`nav-item has-treeview ${isCadastroOpen ? 'menu-open' : ''}`}>
-              <a href="#" className={`nav-link ${isCadastroOpen ? 'active' : ''}`} onClick={handleCadastroToggle}>
-                <i className="nav-icon fas fa-users"></i>
-                <p>
-                  Cadastro
-                  <i className="right fas fa-angle-left"></i>
-                </p>
-              </a>
-              <ul className="nav nav-treeview">
-                {permissions.cliente > 0 && (
-                  <li className="nav-item">
-                    <Link to="/clients" className={`nav-link ${isClientsActive ? 'active' : ''}`}>
-                      <i className="far fa-circle nav-icon text-warning"></i>
-                      <p>Clientes</p>
-                    </Link>
-                  </li>
-                )}
-                {permissions.fornecedor > 0 && (
-                  <li className="nav-item">
-                    <Link to="/providers" className={`nav-link ${isProvidersActive ? 'active' : ''}`}>
-                      <i className="far fa-circle nav-icon text-purple"></i>
-                      <p>Fornecedores</p>
-                    </Link>
-                  </li>
-                )}
-                {permissions.cadusuario > 0 && (
-                  <li className="nav-item">
-                    <Link to="/users" className={`nav-link ${isUsersActive ? 'active' : ''}`}>
-                      <i className="far fa-circle nav-icon text-danger"></i>
-                      <p>Usuários</p>
-                    </Link>
-                  </li>
-                )}
-              </ul>
-            </li>
+            {hasCadastroPermission && (
+              <li className={`nav-item has-treeview ${isCadastroOpen ? 'menu-open' : ''}`}>
+                <a href="#" className={`nav-link ${isCadastroOpen ? 'active' : ''}`} onClick={handleCadastroToggle}>
+                  <i className="nav-icon fas fa-users"></i>
+                  <p>
+                    Cadastro
+                    <i className="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul className="nav nav-treeview">
+                  {permissions.cliente > 0 && (
+                    <li className="nav-item">
+                      <Link to="/clients" className={`nav-link ${isClientsActive ? 'active' : ''}`}>
+                        <i className="far fa-circle nav-icon text-warning"></i>
+                        <p>Clientes</p>
+                      </Link>
+                    </li>
+                  )}
+                  {permissions.fornecedor > 0 && (
+                    <li className="nav-item">
+                      <Link to="/providers" className={`nav-link ${isProvidersActive ? 'active' : ''}`}>
+                        <i className="far fa-circle nav-icon text-purple"></i>
+                        <p>Fornecedores</p>
+                      </Link>
+                    </li>
+                  )}
+                  {permissions.cadusuario > 0 && (
+                    <li className="nav-item">
+                      <Link to="/users" className={`nav-link ${isUsersActive ? 'active' : ''}`}>
+                        <i className="far fa-circle nav-icon text-danger"></i>
+                        <p>Usuários</p>
+                      </Link>
+                    </li>
+                  )}
+                </ul>
+              </li>
+            )}
 
             {permissions.financeiro > 0 && (
               <li className="nav-item has-treeview">
@@ -84,6 +94,12 @@ const Aside = () => {
                   </p>
                 </a>
                 <ul className="nav nav-treeview">
+                  <li className="nav-item">
+                    <Link to="/cashflowday" className="nav-link">
+                      <i className="far fa-circle nav-icon text-success"></i>
+                      <p>Caixa Diário</p>
+                    </Link>
+                  </li>
                   <li className="nav-item">
                     <Link to="/accountplain" className="nav-link">
                       <i className="far fa-circle nav-icon text-warning"></i>
@@ -113,17 +129,133 @@ const Aside = () => {
                     </li>
                   )}
                   <li className="nav-item">
+                    <Link to="/salescommission" className="nav-link">
+                      <i className="far fa-circle nav-icon text-info"></i>
+                      <p>Comissão de Vendas</p>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
                     <Link to="/financial" className="nav-link">
-                      <i className="far fa-circle nav-icon text-success"></i>
+                      <i className="far fa-circle nav-icon text-secondary"></i>
                       <p>Fluxo Financeiro</p>
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link to="/accounts" className="nav-link">
-                      <i className="far fa-circle nav-icon text-secondary"></i>
-                      <p>Baixa Automática</p>
+                    <Link to="/result" className="nav-link">
+                      <i className="far fa-circle nav-icon text-danger"></i>
+                      <p>Resultado Estatístico</p>
                     </Link>
                   </li>
+                </ul>
+              </li>
+            )}
+
+            {permissions.product > 0 && (
+              <li className="nav-item has-treeview">
+                <a href="#" className="nav-link">
+                  <i className="nav-icon fas fa-box-open"></i>
+                  <p>
+                    Produtos
+                    <i className="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul className="nav nav-treeview">
+                  <li className="nav-item">
+                    <Link to="/categories" className="nav-link">
+                      <i className="far fa-circle nav-icon text-warning"></i>
+                      <p>Categorias</p>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/products" className="nav-link">
+                      <i className="far fa-circle nav-icon text-success"></i>
+                      <p>Controle de Estoque</p>
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
+
+            {permissions.restaurant > 0 && (
+              <li className="nav-item has-treeview">
+                <a href="#" className="nav-link">
+                  <i className="nav-icon fas fa-utensils"></i>
+                  <p>
+                    Restaurante
+                    <i className="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul className="nav nav-treeview">
+                  <li className="nav-item">
+                    <Link to="/tableadjustments" className="nav-link">
+                      <i className="far fa-circle nav-icon text-info"></i>
+                      <p>Ajuste de Mesas</p>
+                    </Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link to="/salescontrol" className="nav-link">
+                      <i className="far fa-circle nav-icon text-danger"></i>
+                      <p>Controle de Vendas</p>
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+            )}
+
+            {(permissions.uh > 0 || permissions.occupationmap > 0 || permissions.checklist > 0) && (
+              <li className="nav-item has-treeview">
+                <a href="#" className="nav-link">
+                  <i className="nav-icon fas fa-hotel"></i>
+                  <p>
+                    Hospedagem
+                    <i className="right fas fa-angle-left"></i>
+                  </p>
+                </a>
+                <ul className="nav nav-treeview">
+                  {permissions.uh > 0 && (
+                    <>
+                      <li className="nav-item">
+                        <Link to="/uhtypes" className="nav-link">
+                          <i className="far fa-circle nav-icon text-primary"></i>
+                          <p>Tipos de UH</p>
+                        </Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link to="/uh" className="nav-link">
+                          <i className="far fa-circle nav-icon text-info"></i>
+                          <p>UH</p>
+                        </Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link to="/packages" className="nav-link">
+                          <i className="far fa-circle nav-icon text-success"></i>
+                          <p>Pacotes</p>
+                        </Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link to="/taxservice" className="nav-link">
+                          <i className="far fa-circle nav-icon text-warning"></i>
+                          <p>Taxa de Serviços</p>
+                        </Link>
+                      </li>
+                    </>
+                  )}
+                  {permissions.occupationmap > 0 && (
+                    <li className="nav-item">
+                      <Link to="/occupationmap" className="nav-link">
+                        <i className="far fa-circle nav-icon text-danger"></i>
+                        <p>Mapa de Ocupação</p>
+                      </Link>
+                    </li>
+                  )}
+                  {permissions.checklist > 0 && (
+                    <li className="nav-item">
+                      <Link to="/checklist" className="nav-link">
+                        <i className="far fa-circle nav-icon text-secondary"></i>
+                        <p>Checklist</p>
+                      </Link>
+                    </li>
+                  )}
                 </ul>
               </li>
             )}

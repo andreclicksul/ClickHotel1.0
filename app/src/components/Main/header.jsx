@@ -1,12 +1,14 @@
 import { useContext } from "react"
-import { Link } from "react-router-dom"
 import { MainContext } from "../../contexts/context"
 
 const Header = () => {
   const { logout, srcAvatar, data } = useContext(MainContext)
 
   const avatarSrc = srcAvatar || '/res/admin/avatar/avatar1.png'
-  const userName = data?.desuser || 'Usuário'
+  const userName = (data?.desuser || 'Usuário')
+    .split(' ')
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ')
   const userEmail = data?.desemail || ''
 
   const handleLogout = (event) => {
@@ -15,15 +17,12 @@ const Header = () => {
   }
 
   return (
-    <nav className="main-header navbar navbar-expand navbar-white navbar-light">
+    <nav className="main-header navbar navbar-expand bg-info navbar-light">
       <ul className="navbar-nav">
         <li className="nav-item">
-          <a className="nav-link" data-widget="pushmenu" href="#" role="button">
+          <a className="nav-link text-white" data-widget="pushmenu" href="#" role="button">
             <i className="fas fa-bars"></i>
           </a>
-        </li>
-        <li className="nav-item d-none d-sm-inline-block">
-          <Link to="/home" className="nav-link">Início</Link>
         </li>
       </ul>
 
@@ -31,7 +30,6 @@ const Header = () => {
         <li className="nav-item dropdown user-menu">
           <a href="#" className="nav-link dropdown-toggle" data-toggle="dropdown">
             <img src={avatarSrc} className="user-image img-circle elevation-2" alt="Avatar" />
-            <span className="d-none d-md-inline">{userName}</span>
           </a>
           <ul className="dropdown-menu dropdown-menu-lg dropdown-menu-right">
             <li className="user-header bg-primary">

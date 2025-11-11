@@ -20,7 +20,7 @@ const ForgotReset = () => {
 
   const fullYear = new Date().getFullYear(); 
 
-  useEffect( () => {
+  useEffect(() => {
 
     const confirmCode = async () => {
 
@@ -47,7 +47,7 @@ const ForgotReset = () => {
     }
 
     confirmCode() 
-  }, [])
+  }, [codeid, iduser])
 
   const handleChange = (e) => {
     const value = e.target.value

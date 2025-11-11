@@ -1,0 +1,47 @@
+CREATE OR REPLACE FUNCTION public.sp_manage_audit(
+  p_typemodule text,
+  p_module     text,
+  p_beforeinf  text DEFAULT NULL,
+  p_currentinf text DEFAULT NULL,
+  p_ipaccess   text DEFAULT NULL,
+  p_iduser     uuid DEFAULT NULL
+)
+RETURNS uuid
+LANGUAGE plpgsql
+AS $$
+DECLARE
+  v_audit_id uuid;
+BEGIN
+  IF coalesce(trim(p_typemodule), '') = '' THEN
+    RAISE EXCEPTION 'Tipo de módulo é obrigatório para auditoria.' USING ERRCODE = '22000';
+  END IF;
+
+  IF coalesce(trim(p_module), '') = '' THEN
+    RAISE EXCEPTION 'Nome do módulo é obrigatório para auditoria.' USING ERRCODE = '22000';
+  END IF;
+
+  IF p_iduser IS NULL THEN
+    RAISE EXCEPTION 'Identificador do usuário é obrigatório para auditoria.' USING ERRCODE = '22000';
+  END IF;
+
+  INSERT INTO tb_audit (
+    typemodule,
+    module,
+    beforeinf,
+    currentinf,
+    ipaccess,
+    iduser
+  )
+  VALUES (
+    upper(p_typemodule),
+    upper(p_module),
+    NULLIF(p_beforeinf, ''),
+    NULLIF(p_currentinf, ''),
+    coalesce(p_ipaccess, ''),
+    p_iduser
+  )
+  RETURNING id INTO v_audit_id;
+
+  RETURN v_audit_id;
+END;
+$$;

@@ -17,12 +17,15 @@ CREATE OR REPLACE FUNCTION public.sp_manage_user(
   p_caduser          integer DEFAULT 0,
   p_checklist        integer DEFAULT 0,
   p_provider         integer DEFAULT 0,
+  p_uh               integer DEFAULT 0,
   p_audit            integer DEFAULT 0,
   p_accountpay       integer DEFAULT 0,
   p_accountreceive   integer DEFAULT 0,
+  p_cashflow         integer DEFAULT 0,
   p_financial        integer DEFAULT 0,
   p_product          integer DEFAULT 0,
   p_occupationmap    integer DEFAULT 0,
+  p_restaurant       integer DEFAULT 0,
   p_inactive         boolean DEFAULT false,
   p_lastchange       text DEFAULT NULL,
   p_color            text DEFAULT 'skin-blue',
@@ -61,12 +64,15 @@ DECLARE
     ARRAY['CADUSUARIO',     'caduser'],
     ARRAY['CHECKLIST',      'checklist'],
     ARRAY['FORNECEDOR',     'provider'],
+    ARRAY['UH',             'uh'],
     ARRAY['AUDITORIA',      'audit'],
     ARRAY['CONTA_PAGAR',    'accountpay'],
     ARRAY['CONTA_RECEBER',  'accountreceive'],
+    ARRAY['CASHFLOW',       'cashflow'],
     ARRAY['FINANCEIRO',     'financial'],
     ARRAY['PRODUTO',        'product'],
     ARRAY['MAPA_OCUPACAO',  'occupationmap'],
+    ARRAY['RESTAURANTE',    'restaurant'],
     ARRAY['INATIVO',        'inactive'],
     ARRAY['COR',            'color'],
     ARRAY['AVATAR',         'avatar'],
@@ -121,12 +127,15 @@ BEGIN
              caduser        = p_caduser,
              checklist      = p_checklist,
              provider       = p_provider,
+             uh             = p_uh,
              audit          = p_audit,
              accountpay     = p_accountpay,
              accountreceive = p_accountreceive,
+             cashflow       = p_cashflow,
              financial      = p_financial,
              product        = p_product,
              occupationmap  = p_occupationmap,
+             restaurant     = p_restaurant,
              inactive       = p_inactive,
              lastchange     = p_lastchange,
              color          = p_color,
@@ -145,16 +154,16 @@ BEGIN
         id,
         "user", name, email, phone, password,
         sunday, monday, tuesday, wednesday, thursday, friday, saturday,
-        client, caduser, checklist, provider, audit,
-        accountpay, accountreceive, financial, product, occupationmap,
+        client, caduser, checklist, provider, uh, audit,
+        accountpay, accountreceive, cashflow, financial, product, occupationmap, restaurant,
         inactive, lastchange, color, avatar,
         starthour, startminute, finishhour, finishminute
       ) VALUES (
         v_target_id,
         p_user, p_name, p_email, p_phone, p_password,
         p_sunday, p_monday, p_tuesday, p_wednesday, p_thursday, p_friday, p_saturday,
-        p_client, p_caduser, p_checklist, p_provider, p_audit,
-        p_accountpay, p_accountreceive, p_financial, p_product, p_occupationmap,
+        p_client, p_caduser, p_checklist, p_provider, p_uh, p_audit,
+        p_accountpay, p_accountreceive, p_cashflow, p_financial, p_product, p_occupationmap, p_restaurant,
         p_inactive, p_lastchange, p_color, p_avatar,
         p_starthour, p_startminute, p_finishhour, p_finishminute
       )
@@ -176,21 +185,13 @@ BEGIN
       v_after := v_after || v_label || ':' || v_new || ',';
     END LOOP;
 
-    INSERT INTO tb_audit(
-      typemodule,
-      module,
-      beforeinf,
-      currentinf,
-      ipaccess,
-      iduser
-    )
-    VALUES (
-      'INS',
-      'USUARIO',
-      CASE WHEN v_before <> '' THEN v_before ELSE NULL END,
-      v_after,
-      coalesce(p_ipaccess,''),
-      coalesce(p_actor_id, v_target_id)
+    PERFORM public.sp_manage_audit(
+      p_typemodule := 'INS',
+      p_module     := 'USUARIO',
+      p_beforeinf  := CASE WHEN v_before <> '' THEN v_before ELSE NULL END,
+      p_currentinf := v_after,
+      p_ipaccess   := coalesce(p_ipaccess, ''),
+      p_iduser     := coalesce(p_actor_id, v_target_id)
     );
 
   ----------------------------------------------------------
@@ -227,12 +228,15 @@ BEGIN
            caduser        = coalesce(p_caduser, v_existing.caduser),
            checklist      = coalesce(p_checklist, v_existing.checklist),
            provider       = coalesce(p_provider, v_existing.provider),
+           uh             = coalesce(p_uh, v_existing.uh),
            audit          = coalesce(p_audit, v_existing.audit),
            accountpay     = coalesce(p_accountpay, v_existing.accountpay),
            accountreceive = coalesce(p_accountreceive, v_existing.accountreceive),
+           cashflow       = coalesce(p_cashflow, v_existing.cashflow),
            financial      = coalesce(p_financial, v_existing.financial),
            product        = coalesce(p_product, v_existing.product),
            occupationmap  = coalesce(p_occupationmap, v_existing.occupationmap),
+           restaurant     = coalesce(p_restaurant, v_existing.restaurant),
            inactive       = coalesce(p_inactive, v_existing.inactive),
            lastchange     = coalesce(p_lastchange, v_existing.lastchange),
            color          = coalesce(p_color, v_existing.color),
@@ -261,21 +265,13 @@ BEGIN
     END LOOP;
 
     IF v_diff_before <> '' THEN
-      INSERT INTO tb_audit(
-        typemodule,
-        module,
-        beforeinf,
-        currentinf,
-        ipaccess,
-        iduser
-      )
-      VALUES (
-        'ALT',
-        'USUARIO',
-        v_diff_before,
-        v_diff_after,
-        coalesce(p_ipaccess,''),
-        coalesce(p_actor_id, v_target_id)
+      PERFORM public.sp_manage_audit(
+        p_typemodule := 'ALT',
+        p_module     := 'USUARIO',
+        p_beforeinf  := v_diff_before,
+        p_currentinf := v_diff_after,
+        p_ipaccess   := coalesce(p_ipaccess, ''),
+        p_iduser     := coalesce(p_actor_id, v_target_id)
       );
     END IF;
 
@@ -311,21 +307,13 @@ BEGIN
       v_before := v_before || v_label || ':' || v_old || ',';
     END LOOP;
 
-    INSERT INTO tb_audit(
-      typemodule,
-      module,
-      beforeinf,
-      currentinf,
-      ipaccess,
-      iduser
-    )
-    VALUES (
-      'DEL',
-      'USUARIO',
-      v_before,
-      '',
-      coalesce(p_ipaccess,''),
-      coalesce(p_actor_id, v_target_id)
+    PERFORM public.sp_manage_audit(
+      p_typemodule := 'DEL',
+      p_module     := 'USUARIO',
+      p_beforeinf  := v_before,
+      p_currentinf := '',
+      p_ipaccess   := coalesce(p_ipaccess, ''),
+      p_iduser     := coalesce(p_actor_id, v_target_id)
     );
   END IF;
 

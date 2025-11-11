@@ -1,8 +1,8 @@
 :root {
   --main-header-height: 3.5rem;
   --main-sidebar-width: 250px;
-  --warning-accent-bg: #f39c12;
-  --warning-accent-border: #d68910;
+  --warning-accent-bg: #ffb031;
+  --warning-accent-border: #ffb031;
   --warning-accent-contrast: #ffffff;
 }
 
@@ -128,4 +128,38 @@
   background-color: var(--warning-accent-bg);
   border-color: var(--warning-accent-bg);
   color: var(--warning-accent-contrast);
+}
+.card-primary:not(.card-outline) > .card-header {
+  background-color: #17a2b8;
+  border-bottom-color: #17a2b8;
+}
+
+
+.bg-success,
+.badge-success,
+.alert-success,
+.card-success:not(.card-outline),
+.card-success:not(.card-outline) > .card-header {
+  background-color: #00a65a !important;
+  border-color: #00a65a !important;
+  color: #ffffff !important;
+}
+
+.card-success {
+  border-color: #00a65a !important;
+}
+
+.card-success .card-title,
+.card-success .card-tools .btn-tool {
+  color: #ffffff !important;
+}
+.sidebar-mini.sidebar-collapse .main-sidebar .brand-link {
+  height: calc(3.441rem + 1px);
+}
+
+.sidebar-mini.sidebar-collapse .main-sidebar .brand-link,
+.sidebar-mini.sidebar-collapse .main-sidebar .brand-link + .brand-link {
+  border-left: none !important;
+  border-right: none !important;
+  border-bottom: none !important;
 }

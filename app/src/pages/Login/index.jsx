@@ -2,8 +2,6 @@ import { useState, useContext, useEffect } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { AuthContext } from "../../contexts/context"
 import { FaUser, FaLock } from 'react-icons/fa';
-import { getUserLocalStorage } from "../../services/api"
-
 const Login = () => {
   const navigate = useNavigate()
   const { errcode } = useParams()

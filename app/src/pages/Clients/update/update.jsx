@@ -1,6 +1,5 @@
-import { useParams } from "react-router-dom"
-import { useEffect, useState, useContext } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { useEffect, useState, useContext, useCallback } from "react"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { AuthContext, MainContext } from "../../../contexts/context"
 import { get, getCep, post } from "../../../services/api"
 import { InputMask } from 'primereact/inputmask'
@@ -20,7 +19,7 @@ const ClientsUpdate = () => {
 
   const { logout } = useContext(MainContext)   
 
-  const [ idclient, setIdclient ] = useState(code)
+  const idclient = code
 
   const [ secedit, setSecedit] = useState('')
   
@@ -28,7 +27,7 @@ const ClientsUpdate = () => {
 
   const [ invalidcep, setInvalidcep] = useState(false)
 
-  const [ wrong, setWrong ] = useState('')
+  const [ wrong ] = useState('')
 
   const [ obscontract, setObscontract ] = useState('')
 
@@ -60,9 +59,8 @@ const ClientsUpdate = () => {
     desobstech: ''
   })
 
-  const getIdclient = async () => {
-
-    if (idclient == undefined) {
+  const getIdclient = useCallback(async () => {
+    if (!idclient || !user) {
       logout('301')
       return
     }
@@ -76,20 +74,13 @@ const ClientsUpdate = () => {
       }
 
       setData(response.input)
-
       setCnpjprevious(response.input.descnpj)
-
       setSecedit(response.secEdit)
-
       setSecdelete(response.secDelete)
-
-      //console.log(data)
-
     } catch (e) {
       logout('301')
-      return     
-    }       
-  }
+    }
+  }, [idclient, logout, user])
 
   const handleChange = (e) => {
     const value = e.target.value
@@ -233,13 +224,13 @@ const ClientsUpdate = () => {
     }
   }
 
-  useEffect( () => {
+  useEffect(() => {
     getIdclient()
-  }, [])
+  }, [getIdclient])
 
   return (
     <>
-      <section className="content" style={{ minHeight: `${innerHeight-142}px` }}>
+      <section className="content" style={{ minHeight: `${height - 142}px` }}>
         <form role="form" onSubmit={handleSubmit} noValidate>
           <div className="row">
             <div className="col-md-12">
@@ -273,7 +264,7 @@ const ClientsUpdate = () => {
                             <h4 className="modal-title">Exclusão de Registro</h4>
                           </div>
                           <div className="modal-body">
-                            <p>Atenção! Esta é uma ação sem volta, caso deseje excluir mesmo o registro basta apenas 'Confirmar'.</p>
+                            <p>Atenção! Esta é uma ação sem volta, caso deseje excluir mesmo o registro basta apenas &apos;Confirmar&apos;.</p>
                           </div>
                           <div className="modal-footer">
                             <button type="button" className="btn btn-outline pull-left" data-dismiss="modal">Fechar</button>

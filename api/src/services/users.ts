@@ -14,6 +14,7 @@ import {
   updateSchema,
 } from '../schemas/users'
 import { findUserAuthentication } from '../middlewares/user.services'
+import { registerAudit } from '../utils/audit'
 
 const userSelect = {
   id: true,
@@ -32,12 +33,15 @@ const userSelect = {
   caduser: true,
   checklist: true,
   provider: true,
+  uh: true,
   audit: true,
   accountpay: true,
   accountreceive: true,
+  cashflow: true,
   financial: true,
   product: true,
   occupationmap: true,
+  restaurant: true,
   inactive: true,
   lastchange: true,
   color: true,
@@ -108,6 +112,15 @@ export const loginRouterHandler = async (
 
     const token = app.jwt.sign(user, { expiresIn: '8h' })
 
+    await registerAudit({
+      typemodule: 'LOGIN',
+      module: 'AUTENTICACAO',
+      beforeinf: null,
+      currentinf: `LOGIN:SUCESSO,USUARIO:${user.user}`,
+      ipaccess: request.ip ?? '',
+      iduser: user.id,
+    })
+
     reply.code(200).send({
       token,
       iduser: user.id,
@@ -143,6 +156,41 @@ export const readPermissionUserIdHandler = async (
     const now = new Date()
     const formatTime = (value?: string) =>
       value && value.length === 2 ? value : (`0${value ?? '0'}`).slice(-2)
+    const formatDateTime = (value?: Date) => {
+      if (!value) {
+        return ''
+      }
+
+      const date = value.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      })
+      const time = value.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      })
+
+      return `${date} ${time}`
+    }
+
+    const audits = await prisma.tb_audit.findMany({
+      where: { iduser: payload.id },
+      orderBy: { dtregister: 'desc' },
+      take: 2,
+      select: {
+        dtregister: true,
+        ipaccess: true,
+      },
+    })
+
+    const [mostRecentAudit, previousAudit] = audits
+    const auditToDisplay = previousAudit ?? mostRecentAudit
+    const messageFooter =
+      auditToDisplay && auditToDisplay.dtregister
+        ? `Último acesso: ${formatDateTime(auditToDisplay.dtregister)}`
+        : ''
+    const previousAccess = ''
 
     reply.code(200).send({
       status: 200,
@@ -154,15 +202,18 @@ export const readPermissionUserIdHandler = async (
       avatar: payload.avatar ?? 0,
       yearnow: now.getFullYear(),
       timenow: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-      dateprevious: '',
+      dateprevious: previousAccess,
       desip: request.ip ?? '',
-      msgFooter: '',
+      msgFooter: messageFooter,
       countAvatar: payload.avatar ?? 0,
       startTime: `${formatTime(payload.starthour)}:${formatTime(payload.startminute)}`,
       finishTime: `${formatTime(payload.finishhour)}:${formatTime(payload.finishminute)}`,
       checklist: payload.checklist ?? 0,
       produto: payload.product ?? 0,
       occupationmap: payload.occupationmap ?? 0,
+      restaurant: payload.restaurant ?? 0,
+      uh: payload.uh ?? 0,
+      cashflow: payload.cashflow ?? 0,
       cliente: payload.client ?? 0,
       cadusuario: payload.caduser ?? 0,
       financeiro: payload.financial ?? 0,
@@ -234,12 +285,15 @@ export const readUserIdHandler = async (
         caduser: true,
         checklist: true,
         provider: true,
+        uh: true,
         audit: true,
         accountpay: true,
         accountreceive: true,
+        cashflow: true,
         financial: true,
         product: true,
         occupationmap: true,
+        restaurant: true,
         inactive: true,
         color: true,
         avatar: true,
@@ -305,12 +359,15 @@ export const createUserHandler = async (
         ${parsed.caduser}::int,
         ${parsed.checklist}::int,
         ${parsed.provider}::int,
+        ${parsed.uh}::int,
         ${parsed.audit}::int,
         ${parsed.accountpay}::int,
         ${parsed.accountreceive}::int,
+        ${parsed.cashflow}::int,
         ${parsed.financial}::int,
         ${parsed.product}::int,
         ${parsed.occupationmap}::int,
+        ${parsed.restaurant}::int,
         ${parsed.inactive}::boolean,
         ${parsed.lastchange}::text,
         ${parsed.color}::text,
@@ -450,12 +507,15 @@ export const updateUserHandler = async (
         ${parsed.caduser ?? null}::int,
         ${parsed.checklist ?? null}::int,
         ${parsed.provider ?? null}::int,
+        ${parsed.uh ?? null}::int,
         ${parsed.audit ?? null}::int,
         ${parsed.accountpay ?? null}::int,
         ${parsed.accountreceive ?? null}::int,
+        ${parsed.cashflow ?? null}::int,
         ${parsed.financial ?? null}::int,
         ${parsed.product ?? null}::int,
         ${parsed.occupationmap ?? null}::int,
+        ${parsed.restaurant ?? null}::int,
         ${parsed.inactive ?? null}::boolean,
         ${parsed.lastchange ?? null}::text,
         ${parsed.color ?? null}::text,

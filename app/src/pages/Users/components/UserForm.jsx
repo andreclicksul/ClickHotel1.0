@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { InputMask } from "primereact/inputmask"
 import { AuthContext, MainContext } from "../../../contexts/context"
@@ -21,12 +21,15 @@ const DEFAULT_FORM_VALUES = {
   caduser: 0,
   checklist: 0,
   provider: 0,
+  uh: 0,
   audit: 0,
   accountpay: 0,
   accountreceive: 0,
+  cashflow: 0,
   financial: 0,
   product: 0,
   occupationmap: 0,
+  restaurant: 0,
   inactive: false,
   starthour: "08",
   startminute: "00",
@@ -57,15 +60,29 @@ const permissionFieldNames = new Set([
   "caduser",
   "checklist",
   "provider",
+  "uh",
   "audit",
   "accountpay",
   "accountreceive",
+  "cashflow",
   "financial",
   "product",
   "occupationmap",
+  "restaurant",
 ])
 
 const PASSWORD_PLACEHOLDER = "********"
+const unicodeLetterRegex = /\p{L}/u
+const unicodeNumberRegex = /\p{N}/u
+const FEEDBACK_DURATION_MS = 7000
+
+const normalizePasswordValue = (value = "") => {
+  if (typeof value !== "string") {
+    return ""
+  }
+
+  return typeof value.normalize === "function" ? value.normalize("NFKC") : value
+}
 
 const UserForm = ({
   mode = "create",
@@ -77,6 +94,7 @@ const UserForm = ({
   submitLabel = "Salvar",
   cancelLabel = "Retornar",
   redirectTo = "/users",
+  initialFeedback = null,
 }) => {
   const navigate = useNavigate()
   const { user } = useContext(AuthContext)
@@ -142,7 +160,7 @@ const UserForm = ({
         ...nextValues,
       }
     })
-  }, [initialData])
+  }, [initialData, mode])
 
   useEffect(() => {
     return () => {
@@ -163,7 +181,7 @@ const UserForm = ({
     setFeedback({ type: "", message: "" })
   }
 
-  const showFeedback = (type, message) => {
+  const showFeedback = useCallback((type, message) => {
     setFeedback({ type, message })
 
     if (feedbackTimeoutRef.current) {
@@ -174,9 +192,15 @@ const UserForm = ({
       feedbackTimeoutRef.current = window.setTimeout(() => {
         setFeedback({ type: "", message: "" })
         feedbackTimeoutRef.current = null
-      }, 12000)
+      }, FEEDBACK_DURATION_MS)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (initialFeedback?.message) {
+      showFeedback(initialFeedback.type ?? "success", initialFeedback.message)
+    }
+  }, [initialFeedback, showFeedback])
 
   const handleChange = (event) => {
     const { name, value, type, checked } = event.target
@@ -197,6 +221,16 @@ const UserForm = ({
 
   const formatTime = (value) => String(value ?? "").padStart(2, "0")
 
+  const feedbackClassName = (type = "") => {
+    if (type === "success") {
+      return "text-success"
+    }
+    if (type === "warning") {
+      return "text-warning"
+    }
+    return "text-danger"
+  }
+
   const handleSubmit = async (event) => {
     event.preventDefault()
 
@@ -212,6 +246,7 @@ const UserForm = ({
 
     const isUpdate = mode === "update"
     const passwordChanged = !isUpdate || formData.password !== PASSWORD_PLACEHOLDER
+    let passwordForSubmission = formData.password
 
     if (!formData.user.trim() || !formData.name.trim() || !formData.email.trim()) {
       showFeedback("error", "Preencha os campos Usuário, Nome e E-mail.")
@@ -219,14 +254,17 @@ const UserForm = ({
     }
 
     if (passwordChanged) {
-      if (!formData.password.trim()) {
+      const normalizedPassword = normalizePasswordValue(formData.password)
+      const normalizedConfirmPassword = normalizePasswordValue(formData.confirmPassword)
+
+      if (!normalizedPassword.trim()) {
         showFeedback("error", "Informe uma senha válida.")
         return
       }
 
-      const hasMinLength = formData.password.length >= 8
-      const hasLetter = /[A-Za-z]/.test(formData.password)
-      const hasNumber = /\d/.test(formData.password)
+      const hasMinLength = normalizedPassword.length >= 8
+      const hasLetter = unicodeLetterRegex.test(normalizedPassword)
+      const hasNumber = unicodeNumberRegex.test(normalizedPassword)
 
       if (!hasMinLength || !hasLetter || !hasNumber) {
         showFeedback(
@@ -236,10 +274,12 @@ const UserForm = ({
         return
       }
 
-      if (formData.password !== formData.confirmPassword) {
+      if (normalizedPassword !== normalizedConfirmPassword) {
         showFeedback("error", "A confirmação de senha não confere.")
         return
       }
+
+      passwordForSubmission = normalizedPassword
     }
 
     const payload = {
@@ -258,12 +298,15 @@ const UserForm = ({
       caduser: formData.caduser,
       checklist: formData.checklist,
       provider: formData.provider,
+      uh: formData.uh,
       audit: formData.audit,
       accountpay: formData.accountpay,
       accountreceive: formData.accountreceive,
+      cashflow: formData.cashflow,
       financial: formData.financial,
       product: formData.product,
       occupationmap: formData.occupationmap,
+      restaurant: formData.restaurant,
       inactive: formData.inactive,
       lastchange: (user?.user ?? user?.name ?? "").toUpperCase() || "SISTEMA",
       color:
@@ -283,7 +326,7 @@ const UserForm = ({
     }
 
     if (passwordChanged) {
-      payload.password = formData.password
+      payload.password = passwordForSubmission
     }
 
     setSubmitting(true)
@@ -313,15 +356,31 @@ const UserForm = ({
         return
       }
 
-      showFeedback(
-        "success",
+      const successMessage =
         messageFromResponse ??
-          (mode === "create" ? "Usuário criado com sucesso." : "Usuário atualizado com sucesso.")
-      )
+        (mode === "create" ? "Usuário criado com sucesso." : "Usuário atualizado com sucesso.")
 
-      window.setTimeout(() => {
-        navigate(redirectTo)
-      }, 1500)
+      if (mode === "create") {
+        const normalizedResponse = response?.data ?? response
+        const createdUserId =
+          normalizedResponse?.data?.id ?? normalizedResponse?.id ?? null
+
+        if (!createdUserId) {
+          showFeedback("success", successMessage)
+          return
+        }
+
+        navigate(`/users/update/${createdUserId}`, {
+          state: {
+            feedback: {
+              type: "success",
+              message: successMessage,
+            },
+          },
+        })
+      } else {
+        showFeedback("success", successMessage)
+      }
     } catch (error) {
       const status = error?.response?.status
       const message =
@@ -363,16 +422,11 @@ const UserForm = ({
                     {title}
                   </h1>
                   <div className="card-tools d-flex align-items-center ml-auto">
-                    {feedback.message && (
-                      <span
-                        className={`mr-3 ${
-                          feedback.type === "success" ? "text-success" : "text-danger"
-                        }`}
-                      >
+                    {feedback.message ? (
+                      <span className={`mr-3 ${feedbackClassName(feedback.type)}`}>
                         {feedback.message}
                       </span>
-                    )}
-                    {!confirmingDelete ? (
+                    ) : !confirmingDelete ? (
                       <>
                         <button
                           type="submit"
@@ -392,29 +446,29 @@ const UserForm = ({
                                 return
                               }
 
-                          setConfirmingDelete(true)
-                          setDeleteCountdown(20)
+                              setConfirmingDelete(true)
+                              setDeleteCountdown(20)
 
-                          if (deleteTimerRef.current) {
-                            clearInterval(deleteTimerRef.current)
-                          }
-
-                          deleteTimerRef.current = window.setInterval(() => {
-                            setDeleteCountdown((prev) => {
-                              if (prev <= 1) {
                               if (deleteTimerRef.current) {
                                 clearInterval(deleteTimerRef.current)
-                                deleteTimerRef.current = null
                               }
-                              setConfirmingDelete(false)
-                              setDeleteCountdown(20)
-                              return 20
-                            }
-                              return prev - 1
-                            })
-                          }, 1000)
-                        }}
-                      >
+
+                              deleteTimerRef.current = window.setInterval(() => {
+                                setDeleteCountdown((prev) => {
+                                  if (prev <= 1) {
+                                    if (deleteTimerRef.current) {
+                                      clearInterval(deleteTimerRef.current)
+                                      deleteTimerRef.current = null
+                                    }
+                                    setConfirmingDelete(false)
+                                    setDeleteCountdown(20)
+                                    return 20
+                                  }
+                                  return prev - 1
+                                })
+                              }, 1000)
+                            }}
+                          >
                             <i className="fa fa-trash mr-1"></i>
                             Excluir
                           </button>
@@ -605,12 +659,15 @@ const UserForm = ({
                           { name: "caduser", label: "Usuários" },
                           { name: "client", label: "Clientes" },
                           { name: "provider", label: "Fornecedores" },
+                          { name: "uh", label: "UH" },
                           { name: "checklist", label: "Checklist" },
                           { name: "product", label: "Produtos" },
                           { name: "occupationmap", label: "Mapa de Ocupação" },
+                          { name: "restaurant", label: "Restaurante" },
                           { name: "financial", label: "Financeiro" },
                           { name: "accountpay", label: "Contas a Pagar" },
                           { name: "accountreceive", label: "Contas a Receber" },
+                          { name: "cashflow", label: "Fluxo de Caixa" },
                           { name: "audit", label: "Auditoria" },
                         ].map((field) => (
                           <div className="form-group col-md-3 col-sm-6" key={field.name}>
