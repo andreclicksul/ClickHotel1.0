@@ -1,6 +1,6 @@
 -- CreateTable
 CREATE TABLE "tb_users" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "user" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -23,8 +23,11 @@ CREATE TABLE "tb_users" (
     "financial" INTEGER NOT NULL,
     "product" INTEGER NOT NULL,
     "occupationmap" INTEGER NOT NULL,
+    "cashflow" INTEGER NOT NULL,
+    "restaurant" INTEGER NOT NULL,
+    "uh" INTEGER NOT NULL,
     "inactive" BOOLEAN NOT NULL DEFAULT false,
-    "dtregister" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "dtregister" TIMESTAMP(3) NOT NULL DEFAULT timezone('America/Sao_Paulo', now()),
     "lastchange" TEXT NOT NULL,
     "color" TEXT NOT NULL,
     "avatar" INTEGER NOT NULL,
@@ -39,14 +42,14 @@ CREATE TABLE "tb_users" (
 
 -- CreateTable
 CREATE TABLE "tb_audit" (
-    "id" TEXT NOT NULL,
-    "dtregister" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
+    "dtregister" TIMESTAMP(3) NOT NULL DEFAULT timezone('America/Sao_Paulo', now()),
     "typemodule" TEXT NOT NULL,
     "module" TEXT NOT NULL,
     "beforeinf" TEXT,
     "currentinf" TEXT,
     "ipaccess" TEXT NOT NULL,
-    "iduser" TEXT NOT NULL,
+    "iduser" UUID NOT NULL,
 
     CONSTRAINT "tb_audit_pkey" PRIMARY KEY ("id")
 );

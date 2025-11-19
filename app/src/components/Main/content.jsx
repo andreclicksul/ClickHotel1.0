@@ -3,7 +3,6 @@ import { MainContext } from "../../contexts/context"
 import { BillingProvider } from "../../contexts/billing"
 import DashboardAlerts from "../Dashboard/alerts"
 import BillingModule from "../Dashboard/billing"
-import RecentClients from "../Dashboard/recentclients"
 import GraphicsDashboad from "../Dashboard/graphics"
 
 const Content = () => {
@@ -28,7 +27,6 @@ const Content = () => {
 
           <div className="row">
             {financeEnabled && <GraphicsDashboad />}
-            <RecentClients />
           </div>
         </BillingProvider>
       </section>

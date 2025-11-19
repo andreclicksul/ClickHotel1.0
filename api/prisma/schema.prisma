@@ -59,3 +59,46 @@ model tb_audit {
   iduser     String   @db.Uuid
   user       tb_users @relation(fields: [iduser], references: [id])
 }
+
+model tb_client {
+  idclient         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dtregister       DateTime @default(dbgenerated("timezone('America/Sao_Paulo', now())"))
+  desname          String
+  dtnasc           DateTime @db.Date
+  descel           String?
+  descep           String?
+  desstreet        String?
+  desnumber        String?
+  descomplement    String?
+  desdistrict      String?
+  descity          String?
+  desuf            String?
+  descpf           String?
+  desemail         String?
+  desrestalimentar String?
+  desveiculo       String?
+  desobs           String?  @db.Text
+  lastchange       String?
+}
+
+model tb_provider {
+  idprovider    String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  dtregister    DateTime @default(dbgenerated("timezone('America/Sao_Paulo', now())"))
+  desname       String
+  descorporate  String?
+  desphone      String?
+  descel        String?
+  descep        String?
+  desstreet     String?
+  desnumber     String?
+  descomplement String?
+  desdistrict   String?
+  descity       String?
+  desuf         String?
+  descnpj       String?
+  desie         String?
+  desobs        String?  @db.Text
+  desemail      String?
+  lastchange    String?
+  inactive      Boolean  @default(false)
+}
