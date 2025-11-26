@@ -23,7 +23,7 @@ const normalizeTitle = (value) => {
 
 const UsersList = () => {
   const { logout, permissions = {} } = useContext(MainContext)
-  const cadUserLevel = Number(permissions.cadusuario ?? 0)
+  const cadUserLevel = Number(permissions.caduser ?? 0)
   const canCreateUsers = cadUserLevel >= 2
   const canEditUsers = cadUserLevel >= 3
   const tableRef = useRef(null)

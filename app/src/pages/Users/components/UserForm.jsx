@@ -405,7 +405,7 @@ const UserForm = ({
     }
   }
 
-  const cadUserLevel = Number(permissions.cadusuario ?? 0)
+const cadUserLevel = Number(permissions.caduser ?? 0)
   const requiredLevel = mode === "create" ? 2 : 3
   const canModify = cadUserLevel >= requiredLevel
 

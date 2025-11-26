@@ -209,19 +209,19 @@ export const readPermissionUserIdHandler = async (
       startTime: `${formatTime(payload.starthour)}:${formatTime(payload.startminute)}`,
       finishTime: `${formatTime(payload.finishhour)}:${formatTime(payload.finishminute)}`,
       checklist: payload.checklist ?? 0,
-      produto: payload.product ?? 0,
+      product: payload.product ?? 0,
       occupationmap: payload.occupationmap ?? 0,
       restaurant: payload.restaurant ?? 0,
       uh: payload.uh ?? 0,
       cashflow: payload.cashflow ?? 0,
-      cliente: payload.client ?? 0,
-      cadusuario: payload.caduser ?? 0,
-      financeiro: payload.financial ?? 0,
+      client: payload.client ?? 0,
+      caduser: payload.caduser ?? 0,
+      financial: payload.financial ?? 0,
       billing: payload.checklist ?? 0,
-      cp: payload.accountpay ?? 0,
-      cr: payload.accountreceive ?? 0,
-      fornecedor: payload.provider ?? 0,
-      auditoria: payload.audit ?? 0,
+      accountpay: payload.accountpay ?? 0,
+      accountreceive: payload.accountreceive ?? 0,
+      provider: payload.provider ?? 0,
+      audit: payload.audit ?? 0,
     })
   } catch (error) {
     reply.code(401).send({ msg: 'Sessão encerrada', error: `${error}` })
@@ -320,13 +320,35 @@ export const createUserHandler = async (
   reply: FastifyReply,
 ) => {
   try {
-    const payload = (
-      (request as any).user ?? (await request.jwtVerify())
-    ) as Record<string, any>
+    const authHeader = request.headers?.authorization
+    let payload: Record<string, any> | null = null
+
+    const existingUsers = await prisma.tb_users.count({ where: { deleted: false } })
+
+    if (authHeader) {
+      try {
+        payload = (request as any).user ?? (await request.jwtVerify())
+      } catch (err) {
+        if (existingUsers > 0) {
+          return reply
+            .code(401)
+            .send({ status: 401, msg: 'Token inválido ou ausente.' })
+        }
+        // Se não há usuários ainda, segue sem payload para permitir bootstrap.
+        payload = null
+      }
+    }
+
+    // Se já existe usuário e não há token válido, bloqueia.
+    if (!payload && existingUsers > 0) {
+      return reply
+        .code(401)
+        .send({ status: 401, msg: 'Token inválido ou ausente.' })
+    }
 
     const caduserPermission = Number(payload?.caduser ?? 0)
 
-    if (caduserPermission < 2) {
+    if (payload && caduserPermission < 2) {
       return reply
         .code(403)
         .send({ status: 403, msg: 'Permissão insuficiente para criar usuários.' })
@@ -336,6 +358,8 @@ export const createUserHandler = async (
 
     const salt = await bcrypt.genSalt(12)
     const passwordHash = await bcrypt.hash(parsed.password ?? '', salt)
+
+    const payloadUserId = payload?.id ?? null
 
     const spResult = await prisma.$queryRaw<
       { sp_manage_user: string }[]
@@ -377,7 +401,7 @@ export const createUserHandler = async (
         ${parsed.finishhour}::text,
         ${parsed.finishminute}::text,
         ${request.ip ?? null}::text,
-        ${payload.id ?? null}::uuid
+        ${payloadUserId}::uuid
       )
     `
 
@@ -403,7 +427,7 @@ export const createUserHandler = async (
     if (error instanceof ZodError) {
       return reply.code(400).send({
         status: 400,
-        msg: 'Usuário já existente.',
+        msg: 'Dados inválidos para criação do usuário.',
         issues: error.issues,
       })
     }

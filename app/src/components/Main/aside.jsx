@@ -25,9 +25,14 @@ const Aside = () => {
   const isUsersActive = location.pathname.startsWith('/users')
 
   const hasCadastroPermission =
-    (permissions.cliente ?? 0) > 0 ||
-    (permissions.fornecedor ?? 0) > 0 ||
-    (permissions.cadusuario ?? 0) > 0
+    (permissions.client ?? 0) > 0 ||
+    (permissions.provider ?? 0) > 0 ||
+    (permissions.caduser ?? 0) > 0
+
+  const hasOccupationPermission = 
+    (permissions.uh ?? 0) > 0 || 
+    (permissions.occupationmap ?? 0) > 0 || 
+    (permissions.checklist ?? 0) > 0
 
   return (
     <aside className="main-sidebar sidebar-dark-primary">
@@ -56,7 +61,7 @@ const Aside = () => {
                   </p>
                 </a>
                 <ul className="nav nav-treeview">
-                  {permissions.cliente > 0 && (
+                  {permissions.client > 0 && (
                     <li className="nav-item">
                       <Link to="/clients" className={`nav-link ${isClientsActive ? 'active' : ''}`}>
                         <i className="far fa-circle nav-icon text-warning"></i>
@@ -64,7 +69,7 @@ const Aside = () => {
                       </Link>
                     </li>
                   )}
-                  {permissions.fornecedor > 0 && (
+                  {permissions.provider > 0 && (
                     <li className="nav-item">
                       <Link to="/providers" className={`nav-link ${isProvidersActive ? 'active' : ''}`}>
                         <i className="far fa-circle nav-icon text-purple"></i>
@@ -72,7 +77,7 @@ const Aside = () => {
                       </Link>
                     </li>
                   )}
-                  {permissions.cadusuario > 0 && (
+                  {permissions.caduser > 0 && (
                     <li className="nav-item">
                       <Link to="/users" className={`nav-link ${isUsersActive ? 'active' : ''}`}>
                         <i className="far fa-circle nav-icon text-danger"></i>
@@ -84,7 +89,7 @@ const Aside = () => {
               </li>
             )}
 
-            {permissions.financeiro > 0 && (
+            {(permissions.financial ?? 0) > 0 && (
               <li className="nav-item has-treeview">
                 <a href="#" className="nav-link">
                   <i className="nav-icon fas fa-dollar-sign"></i>
@@ -112,7 +117,7 @@ const Aside = () => {
                       <p>Bancos</p>
                     </Link>
                   </li>
-                  {permissions.cp > 0 && (
+                  {permissions.accountpay > 0 && (
                     <li className="nav-item">
                       <Link to="/pay/0/index" className="nav-link">
                         <i className="far fa-circle nav-icon text-danger"></i>
@@ -120,7 +125,7 @@ const Aside = () => {
                       </Link>
                     </li>
                   )}
-                  {permissions.cr > 0 && (
+                  {permissions.accountreceive > 0 && (
                     <li className="nav-item">
                       <Link to="/rec/0/index" className="nav-link">
                         <i className="far fa-circle nav-icon text-primary"></i>
@@ -150,7 +155,7 @@ const Aside = () => {
               </li>
             )}
 
-            {permissions.product > 0 && (
+            {(permissions.product ?? 0) > 0 && (
               <li className="nav-item has-treeview">
                 <a href="#" className="nav-link">
                   <i className="nav-icon fas fa-box-open"></i>
@@ -176,7 +181,7 @@ const Aside = () => {
               </li>
             )}
 
-            {permissions.restaurant > 0 && (
+            {(permissions.restaurant ?? 0) > 0 && (
               <li className="nav-item has-treeview">
                 <a href="#" className="nav-link">
                   <i className="nav-icon fas fa-utensils"></i>
@@ -202,7 +207,7 @@ const Aside = () => {
               </li>
             )}
 
-            {(permissions.uh > 0 || permissions.occupationmap > 0 || permissions.checklist > 0) && (
+            {hasOccupationPermission && (
               <li className="nav-item has-treeview">
                 <a href="#" className="nav-link">
                   <i className="nav-icon fas fa-hotel"></i>
@@ -267,7 +272,7 @@ const Aside = () => {
               </Link>
             </li>
 
-            {permissions.auditoria > 0 && (
+            {(permissions.audit ?? 0) > 0 && (
               <li className="nav-item">
                 <Link to="/audits/0" className="nav-link">
                   <i className="nav-icon fas fa-stream"></i>

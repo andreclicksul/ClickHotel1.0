@@ -25,15 +25,13 @@ export const MainProvider = ({ children }) => {
   })
 
   const [ permissions, setPermissions ] = useState({
-    cliente: 0,
-    cadusuario: 0,
+    client: 0,
+    caduser: 0,
     checklist: 0,
-    fornecedor: 0,
-    auditoria: 0,
-    financeiro: 0,
+    provider: 0,
+    audit: 0,
+    financial: 0,
     billing: 0,
-    cp: 0,
-    cr: 0,
     accountpay: 0,
     accountreceive: 0,
     product: 0,
@@ -84,22 +82,20 @@ export const MainProvider = ({ children }) => {
       })
 
       setPermissions({
-        cliente: response.cliente ?? 0,
-        cadusuario: response.cadusuario ?? 0,
-        checklist: response.checklist ?? response.billing ?? 0,
-        fornecedor: response.fornecedor ?? 0,
-        auditoria: response.auditoria ?? 0,
-        financeiro: response.financeiro ?? 0,
-        billing: response.billing ?? response.checklist ?? 0,
-        cp: response.cp ?? response.accountpay ?? 0,
-        cr: response.cr ?? response.accountreceive ?? 0,
-        accountpay: response.accountpay ?? response.cp ?? 0,
-        accountreceive: response.accountreceive ?? response.cr ?? 0,
-        product: response.produto ?? response.product ?? 0,
+        client: response.client ?? 0,
+        caduser: response.caduser ?? 0,
+        checklist: response.checklist ?? 0,
+        provider: response.provider ?? 0,
+        audit: response.audit ?? 0,
+        financial: response.financial ?? 0,
+        accountpay: response.accountpay ?? 0,
+        accountreceive: response.accountreceive ?? 0,
+        product: response.product ?? 0,
         occupationmap: response.occupationmap ?? 0,
         cashflow: response.cashflow ?? 0,
         restaurant: response.restaurant ?? 0,
         uh: response.uh ?? 0,
+        billing: response.billing ?? response.checklist ?? 0,
       })
       
      } catch (e) {

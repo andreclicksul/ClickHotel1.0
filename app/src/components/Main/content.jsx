@@ -8,7 +8,7 @@ import GraphicsDashboad from "../Dashboard/graphics"
 const Content = () => {
   const { permissions = {} } = useContext(MainContext)
   const billingEnabled = (permissions.billing ?? 0) >= 3
-  const financeEnabled = (permissions.financeiro ?? 0) >= 4
+  const financeEnabled = (permissions.financial ?? 0) >= 4
 
   const browserHeight = typeof window !== 'undefined' ? window.innerHeight : 768
   const contentMinHeight = `${browserHeight - 142}px`
